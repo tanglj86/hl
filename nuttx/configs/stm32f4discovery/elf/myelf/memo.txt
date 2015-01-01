@@ -1,0 +1,9 @@
+1.需要genromfs 工具，可以去misc/tools里找到源码并编译make生成该工具；
+2.修改setenv.sh
+3.source setenv.sh
+4.make menuconfig 修改tool chain
+5.make -j4
+
+目前还是有问题。。。。
+
+20141101，tlj

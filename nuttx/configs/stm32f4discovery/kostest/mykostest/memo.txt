@@ -1,0 +1,9 @@
+1. ./configure.sh stm32f4discovery/kostest
+2.ĞŞ¸Äsetenv.sh
+3.source setenv.sh
+4.make menuconfig ĞŞ¸Ätool chain
+5.make -j4 pass1 pass2
+6.cat nuttx.hex nuttx_user.hex >combined.hex
+
+
+20141101,tlj
