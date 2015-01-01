@@ -169,7 +169,7 @@ if [ -z "$fatsectsize" ]; then
     fatsectsize=512
 fi
 if [ -z "$fatnsectors" ]; then
-    fatnsectors=1024
+    fatnsectors=100
 fi
 if [ -z "$fatmpt" ]; then
    fatmpt="/tmp"
