@@ -251,6 +251,13 @@ config ARCH_CHIP_STM32F100VE
 	select STM32_VALUELINE
 	select STM32_HIGHDENSITY
 
+config ARCH_CHIP_STM32F102CB
+	bool "STM32F102CB"
+	select ARCH_CORTEXM3
+	select STM32_STM32F10XX
+	select STM32_USBACCESSLINE
+	select STM32_MEDIUMDENSITY
+
 config ARCH_CHIP_STM32F103T8
 	bool "STM32F103T8"
 	select ARCH_CORTEXM3
@@ -316,6 +323,13 @@ config ARCH_CHIP_STM32F103RD
 
 config ARCH_CHIP_STM32F103RE
 	bool "STM32F103RE"
+	select ARCH_CORTEXM3
+	select STM32_STM32F10XX
+	select STM32_PERFORMANCELINE
+	select STM32_HIGHDENSITY
+
+config ARCH_CHIP_STM32F103RG
+	bool "STM32F103RG"
 	select ARCH_CORTEXM3
 	select STM32_STM32F10XX
 	select STM32_PERFORMANCELINE
@@ -665,6 +679,14 @@ config STM32_PERFORMANCELINE
 	select STM32_HAVE_TIM8
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_CAN1
+
+config STM32_USBACCESSLINE
+	bool
+	default n
+	select STM32_HAVE_USBDEV
+	select STM32_HAVE_FSMC
+	select STM32_HAVE_USART3
+	select STM32_HAVE_SPI2
 
 config STM32_HIGHDENSITY
 	bool
@@ -1210,6 +1232,14 @@ config STM32_LTDC
 		the STM32F429 and STM32F439 devices.  It is a standard parallel
 		video interface (HSYNC, VSYNC, etc.) for controlling TFT
 		LCD displays.
+
+config STM32_DMA2D
+	bool "DMA2D"
+	default n
+	depends on STM32_STM32F429
+	---help---
+		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
+		available on the STM32F429 and STM32F439 devices.
 
 config STM32_OTGFS
 	bool "OTG FS"
@@ -3079,6 +3109,16 @@ config SERIAL_DISABLE_REORDERING
 		want the side effect of having all serial port names change when just
 		the console is moved from serial to USB.
 
+config STM32_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	depends on STM32_USART
+	default n
+	---help---
+		Enable UART RTS flow control using Software. Because STM
+		Current STM32 have broken HW based RTS behavior (they assert
+		nRTS after every byte received)  Enable this setting workaround
+		this issue by useing software based management of RTS
+
 endmenu
 
 config STM32_USART_SINGLEWIRE
@@ -3557,6 +3597,12 @@ if STM32_LTDC
 
 menu "LTDC Configuration"
 
+config STM32_LTDC_INTERFACE
+	bool "LTDC interface support"
+	default n
+	---help---
+		Enable the ltdc interface to support ltdc layer control.
+
 config STM32_LTDC_BACKLIGHT
 	bool "Backlight support"
 	default y
@@ -3571,6 +3617,34 @@ config STM32_LTDC_BACKCOLOR
 	---help---
 		This is the background color that will be used as the LTDC
 		background layer color.  It is an RGB888 format value.
+
+config STM32_LTDC_DITHER
+	bool "Dither support"
+	default n
+
+config STM32_LTDC_DITHER_RED
+	depends on STM32_LTDC_DITHER
+	int "Dither red width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither red width.
+
+config STM32_LTDC_DITHER_GREEN
+	depends on STM32_LTDC_DITHER
+	int "Dither green width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither green width.
+
+config STM32_LTDC_DITHER_BLUE
+	depends on STM32_LTDC_DITHER
+	int "Dither blue width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither blue width.
 
 config STM32_LTDC_FB_BASE
 	hex "Framebuffer memory start address"
@@ -3651,7 +3725,64 @@ endchoice # Layer 2 color format
 
 endif # STM32_LTDC_L2
 
+if STM32_LTDC_L1_L8 || STM32_LTDC_L2_L8
+
+config FB_CMAP
+	bool "Enable color map support"
+	default y
+	---help---
+		Enabling color map suport is neccessary for ltdc L8 format.
+
+endif
 endmenu
 
 endif # STM32_LTDC
+
+if STM32_DMA2D
+
+menu "DMA2D Configuration"
+
+config STM32_DMA2D_NLAYERS
+	int "Number DMA2D layers"
+	default 2
+	---help---
+		Number of allocatable DMA2D layers except the LTDC layer.
+
+menu "Supported pixel format"
+
+config STM32_DMA2D_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+	default y
+
+config STM32_DMA2D_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+	default n
+
+config STM32_DMA2D_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+	default n
+
+config STM32_DMA2D_RGB565
+	bool "16 bpp RGB 565"
+	default y
+
+config STM32_DMA2D_ARGB4444
+	bool "16 bpp ARGB 4444"
+	default n
+
+config STM32_DMA2D_ARGB1555
+	bool "16 bpp ARGB 1555"
+	default n
+
+config STM32_DMA2D_RGB888
+	bool "24 bpp RGB 888"
+	default y
+
+config STM32_DMA2D_ARGB8888
+	bool "32 bpp ARGB 8888"
+	default n
+
+endmenu
+endmenu
+endif # STM32_DMA2D
 

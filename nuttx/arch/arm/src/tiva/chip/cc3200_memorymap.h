@@ -84,18 +84,17 @@
 
 #if defined(CONFIG_ARCH_CHIP_CC3200)
 
-#  define TIVA_WDOG0_BASE     (TIVA_PERIPH_BASE + 0x00000) /* -0x00fff: Watchdog Timer 0 */
+#  define TIVA_WDOG0_BASE     (TIVA_PERIPH_BASE + 0x00000)  /* -0x00fff: Watchdog Timer 0 */
 
-#  define TIVA_GPIOA_BASE     (TIVA_PERIPH_BASE + 0x04000) /* -0x04fff: GPIO Port A */
-#  define TIVA_GPIOB_BASE     (TIVA_PERIPH_BASE + 0x05000) /* -0x05fff: GPIO Port B */
-#  define TIVA_GPIOC_BASE     (TIVA_PERIPH_BASE + 0x06000) /* -0x06fff: GPIO Port C */
-#  define TIVA_GPIOD_BASE     (TIVA_PERIPH_BASE + 0x07000) /* -0x07fff: GPIO Port D */
+#  define TIVA_GPIOA_BASE     (TIVA_PERIPH_BASE + 0x04000)  /* -0x04fff: GPIO Port A */
+#  define TIVA_GPIOB_BASE     (TIVA_PERIPH_BASE + 0x05000)  /* -0x05fff: GPIO Port B */
+#  define TIVA_GPIOC_BASE     (TIVA_PERIPH_BASE + 0x06000)  /* -0x06fff: GPIO Port C */
+#  define TIVA_GPIOD_BASE     (TIVA_PERIPH_BASE + 0x07000)  /* -0x07fff: GPIO Port D */
 
-#  define TIVA_UART0_BASE     (TIVA_PERIPH_BASE + 0x0c000) /* -0x0cfff: UART0 */
-#  define TIVA_UART1_BASE     (TIVA_PERIPH_BASE + 0x0d000) /* -0x0dfff: UART1 */
+#  define TIVA_UART0_BASE     (TIVA_PERIPH_BASE + 0x0c000)  /* -0x0cfff: UART0 */
+#  define TIVA_UART1_BASE     (TIVA_PERIPH_BASE + 0x0d000)  /* -0x0dfff: UART1 */
 
-#  define TIVA_I2CM0_BASE     (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C Master 0 */
-#  define TIVA_I2CS0_BASE     (TIVA_PERIPH_BASE + 0x20800)  /* -0x20fbf: I2C Slave 0 */
+#  define TIVA_I2C0_BASE      (TIVA_PERIPH_BASE + 0x20000)  /* -0x207ff: I2C0 */
 
 #  define TIVA_TIMER0_BASE    (TIVA_PERIPH_BASE + 0x30000)  /* -0x30fff: 16/32 Timer 0 */
 #  define TIVA_TIMER1_BASE    (TIVA_PERIPH_BASE + 0x31000)  /* -0x31fff: 16/32 Timer 1 */
@@ -122,7 +121,7 @@
 /* Crypto Base Addresses */
 
 #  define TIVA_TCP_DTHE_BASE  (TIVA_CRYPTO_BASE + 0x0000)  /* -0x0fff: TCP Checksum & DTHE regs */
-#  define TIVA_CRC_BASE       TIVA_TCP_DTHE_BASE
+#  define TIVA_CCM_BASE       TIVA_TCP_DTHE_BASE
 #  define TIVA_SHA_BASE       (TIVA_CRYPTO_BASE + 0x5000)  /* -0x5fff: MD5/SHA */
 #  define TIVA_AES_BASE       (TIVA_CRYPTO_BASE + 0x7000)  /* -0x7fff: AES */
 #  define TIVA_DES_BASE       (TIVA_CRYPTO_BASE + 0x9000)  /* -0x9fff: DES */

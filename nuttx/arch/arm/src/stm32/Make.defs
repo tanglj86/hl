@@ -54,6 +54,10 @@ CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c
 CMN_CSRCS += up_systemreset.c up_unblocktask.c up_usestack.c up_doirq.c
 CMN_CSRCS += up_hardfault.c up_svcall.c up_vfork.c
 
+ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
+CMN_CSRCS += up_stackcheck.c
+endif
+
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CMN_ASRCS += up_exception.S
 CMN_CSRCS += up_vectors.c
@@ -130,6 +134,9 @@ endif
 ifeq ($(CONFIG_STM32_OTGFS),y)
 CHIP_CSRCS += stm32_otgfsdev.c
 endif
+ifeq ($(CONFIG_STM32_OTGHS),y)
+CHIP_CSRCS += stm32_otghsdev.c
+endif
 endif
 
 ifeq ($(CONFIG_USBHOST),y)
@@ -190,6 +197,10 @@ endif
 
 ifeq ($(CONFIG_STM32_LTDC),y)
 CHIP_CSRCS += stm32_ltdc.c
+endif
+
+ifeq ($(CONFIG_STM32_DMA2D),y)
+CHIP_CSRCS += stm32_dma2d.c
 endif
 
 ifeq ($(CONFIG_PWM),y)

@@ -37,14 +37,15 @@
 
 # Sub-directories
 
-SUBDIRS  = adc buttons can cc3000 cpuhog cxxtest dhcpd discover elf
-SUBDIRS += flash_test ftpc ftpd hello helloxx hidkbd igmp i2schar json
-SUBDIRS += keypadtest lcdrw mm modbus mount mtdpart mtdrwb netpkt nettest
-SUBDIRS += nrf24l01_term nsh null nx nxterm nxffs nxflat nxhello nximage
-SUBDIRS += nxlines nxtext ostest pashello pipe poll posix_spawn pwm qencoder
-SUBDIRS += random relays rgmp romfs sendmail serialblaster serloop serialrx
-SUBDIRS += slcd smart smart_test tcpecho telnetd thttpd tiff touchscreen udp
-SUBDIRS += usbserial usbterm watchdog webserver wget wgetjson xmlrpc
+SUBDIRS  = adc ajoystick bastest bridge buttons can cc3000 cpuhog cxxtest
+SUBDIRS += dhcpd discover djoystick elf flash_test ftpc ftpd hello helloxx
+SUBDIRS += hidkbd igmp i2schar json keypadtest lcdrw ltdc mm modbus mount
+SUBDIRS += mtdpart mtdrwb netpkt nettest nrf24l01_term nsh null nx nxterm
+SUBDIRS += nxffs nxflat nxhello nximage nxlines nxtext ostest pashello pipe
+SUBDIRS += poll posix_spawn pwm qencoder random relays rgmp romfs sendmail
+SUBDIRS += serialblaster serloop serialrx slcd smart smart_test tcpecho
+SUBDIRS += telnetd thttpd tiff touchscreen udp usbserial usbterm watchdog
+SUBDIRS += webserver wget wgetjson xmlrpc
 
 # Sub-directories that might need context setup.  Directories may need
 # context setup for a variety of reasons, but the most common is because
@@ -53,12 +54,12 @@ SUBDIRS += usbserial usbterm watchdog webserver wget wgetjson xmlrpc
 CNTXTDIRS = pwm
 
 ifeq ($(CONFIG_NSH_BUILTIN_APPS),y)
-CNTXTDIRS += adc can cc3000 cpuhog cxxtest dhcpd discover flash_test ftpd
-CNTXTDIRS += hello helloxx i2schar json keypadtestmodbus lcdrw mtdpart mtdrwb
-CNTXTDIRS += netpkt nettest nx nxhello nximage nxlines nxtext nrf24l01_term
-CNTXTDIRS += ostest random relays qencoder serialblasterslcd serialrx
-CNTXTDIRS += smart_test tcpecho telnetd tiff touchscreen usbterm watchdog
-CNTXTDIRS += wgetjson
+CNTXTDIRS += adc ajoystick bridge can cc3000 cpuhog cxxtest dhcpd discover
+CNTXTDIRS += djoystick flash_test ftpd hello helloxx i2schar json keypadtest
+CNTXTDIRS += ltdc modbus lcdrw mtdpart mtdrwb netpkt nettest nx nxhello
+CNTXTDIRS += nximage nxlines nxtext nrf24l01_term ostest random relays
+CNTXTDIRS += qencoder serialblasters lcd serialrx smart_test tcpecho telnetd
+CNTXTDIRS += tiff touchscreen usbterm watchdog wgetjson
 endif
 
 all: nothing

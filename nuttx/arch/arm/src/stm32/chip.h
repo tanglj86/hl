@@ -69,6 +69,10 @@
 #  if defined(CONFIG_STM32_VALUELINE)
 #    include "chip/stm32f100_pinmap.h"
 
+/* STM32 F102 USB Access Medium Density Family */
+#  elif defined(CONFIG_ARCH_CHIP_STM32F102CB)
+#    include "chip/stm32f102_pinmap.h"
+
 /* STM32 F103 Low / Medium Density Family */
 #  elif defined(CONFIG_ARCH_CHIP_STM32F103C4) || \
         defined(CONFIG_ARCH_CHIP_STM32F103C8) || \
@@ -83,7 +87,8 @@
 #  elif defined(CONFIG_ARCH_CHIP_STM32F103RB) || \
         defined(CONFIG_ARCH_CHIP_STM32F103RC) || \
         defined(CONFIG_ARCH_CHIP_STM32F103RD) || \
-        defined(CONFIG_ARCH_CHIP_STM32F103RE)
+        defined(CONFIG_ARCH_CHIP_STM32F103RE) || \
+        defined(CONFIG_ARCH_CHIP_STM32F103RG)
 #    include "chip/stm32f103r_pinmap.h"
 
 /* STM32F103VC, STM32F103VD, and STM32F103VE are all provided in 100 pin packages and differ

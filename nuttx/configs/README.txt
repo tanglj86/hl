@@ -202,6 +202,10 @@ configs/demo9s12ne64
   port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
   is code complete but has not yet been verified.
 
+configs/dk-tm4c129x
+  This is the port of NuttX to the Tiva® DK-TM4C129x Connected Development Kit.  The
+  Tiva® DK-TM4C129x features the TM4C129XNCZAD MCU.
+
 configs/ea3131
   Embedded Artists EA3131 Development board.  This board is based on the
   an NXP LPC3131 MCU. This OS is built with the arm-nuttx-elf toolchain*.
@@ -217,6 +221,13 @@ configs/eagle100
   Micromint Eagle-100 Development board.  This board is based on the
   an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
   arm-nuttx-elf toolchain*.  STATUS:  This port is complete and mature.
+
+configs/efm32-g8xx-stk
+  The port of NuttX to the the EFM32 Gecko Starter Kit (EFM32-G8XX-STK).
+
+configs/efm32gg-stk3700
+  The port of NuttX to the the EFM32 Giant Gecko Starter Kit
+  (EFM32GG-STK3700).
 
 configs/ekk-lm3s9b96
   TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
@@ -274,6 +285,11 @@ configs/lpcxpresso-lpc1768
 configs/lpc4330-xplorer
   NuttX port to the LPC4330-Xplorer board from NGX Technologies featuring
   the NXP LPC4330FET100 MCU
+
+configs/lpc4357-evb
+  NuttX port to the LPC4357-EVB board from Embest featuring the NXP
+  LPC4357FET256 MCU.  Based on the LPC4300 Xplorer port and provided by
+  Toby Duckworth.
 
 configs/maple
   NuttX support for the LeafLab's Maple and Maple Mini boards. These boards
@@ -536,12 +552,6 @@ configs/stm3240g-eval
   microcontroller (ARM Cortex-M4 with FPU).  This port uses a GNU Cortex-M4
   toolchain (such as CodeSourcery).
 
-configs/stm32f100rc_generic
-  STMicro STM32F100RC generic board based on STM32F100RC high-density value line
-  chip. This "generic" configuration is not very usable out-of-box, but can be
-  used as a starting point to creating new configs with similar STM32
-  high-density value line chips.
-
 configs/stm32f4discovery
   STMicro STM32F4-Discovery board based on the STMIcro STM32F407VGT6 MCU.
 
@@ -567,7 +577,7 @@ configs/teensy
   on an Atmel AT90USB1286 MCU.
 
 configs/tm4c123g-launchpad
-  This is the port of NuttX to the Tiva TM4C123G LaunchPad.  The
+  This is the port of NuttX to the Tiva® TM4C123G LaunchPad.  The
   Tiva® TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
   platform for ARM® Cortex™-M4F-based microcontrollers from Texas
   Instruments.

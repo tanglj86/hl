@@ -47,7 +47,7 @@
  ****************************************************************************/
 /* General ioctl definitions ************************************************/
 /* Each NuttX ioctl commands are uint16_t's consisting of an 8-bit type
- * identifier and an 8-bit command number.  All comman type identifiers are
+ * identifier and an 8-bit command number.  All command type identifiers are
  * defined below:
  */
 
@@ -71,6 +71,8 @@
 #define _WLIOCBASE      (0x1200) /* Wireless modules ioctl commands */
 #define _CFGDIOCBASE    (0x1300) /* Config Data device (app config) ioctl commands */
 #define _TCIOCBASE      (0x1400) /* Timer ioctl commands */
+#define _DJOYBASE       (0x1500) /* Discrete joystick ioctl commands */
+#define _AJOYBASE       (0x1600) /* Analog joystick ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -94,18 +96,13 @@
 #define _WDIOCVALID(c)  (_IOC_TYPE(c)==_WDIOCBASE)
 #define _WDIOC(nr)      _IOC(_WDIOCBASE,nr)
 
-/* Timer driver ioctl commands *******************************************/
-
-#define _TCIOCVALID(c)  (_IOC_TYPE(c)==_TCIOCBASE)
-#define _TCIOC(nr)      _IOC(_TCIOCBASE,nr)
-
 /* NuttX file system ioctl definitions **************************************/
 
 #define _FIOCVALID(c)   (_IOC_TYPE(c)==_FIOCBASE)
 #define _FIOC(nr)       _IOC(_FIOCBASE,nr)
 
 #define FIOC_MMAP       _FIOC(0x0001)     /* IN:  Location to return address (void **)
-                                           * OUT: If media is directly acccesible,
+                                           * OUT: If media is directly accessible,
                                            *      return (void*) base address
                                            *      of file
                                            */
@@ -155,7 +152,7 @@
 #define BIOC_XIPBASE    _BIOC(0x0001)     /* Perform mapping to random access memory.
                                            * IN:  Pointer to pointer to void in
                                            *      which to received the XIP base.
-                                           * OUT: If media is directly acccesible,
+                                           * OUT: If media is directly accessible,
                                            *      return (void*) base address
                                            *      of device memory */
 #define BIOC_PROBE      _BIOC(0x0002)     /* Re-probe and interface; check for media
@@ -192,7 +189,7 @@
                                            * OUT: Number of bytes read or error */
 #define BIOC_WRITESECT  _BIOC(0x0009)     /* Write to data to a logical sector
                                            * IN:  Pointer to sector write data (the
-                                           *      logical secor number and write
+                                           *      logical sector number and write
                                            *      buffer address
                                            * OUT: None (ioctl return value provides
                                            *      success/failure indication). */
@@ -203,6 +200,12 @@
                                            *      ProcFS data.
                                            * OUT: None (ioctl return value provides
                                            *      success/failure indication). */
+#define BIOC_DEBUGCMD   _BIOC(0x000B)     /* Send driver specific debug command /
+                                           * data to the block device.
+                                           * IN:  Pointer to a struct defined for
+                                           *      the block with specific debug
+                                           *      command and data.
+                                           * OUT: None.  */
 
 /* NuttX MTD driver ioctl definitions ***************************************/
 
@@ -216,10 +219,12 @@
                                            *      with data for the MTD */
 #define MTDIOC_XIPBASE    _MTDIOC(0x0002) /* IN:  Pointer to pointer to void in
                                            *      which to received the XIP base.
-                                           * OUT: If media is directly acccesible,
+                                           * OUT: If media is directly accessible,
                                            *      return (void*) base address
                                            *      of device memory */
 #define MTDIOC_BULKERASE  _MTDIOC(0x0003) /* IN:  None
+                                           * OUT: None */
+#define MTDIOC_SETSPEED   _MTDIOC(0x0004) /* IN:  New bus speed in Hz
                                            * OUT: None */
 
 /* NuttX ARP driver ioctl definitions (see netinet/arp.h) *******************/
@@ -291,22 +296,45 @@
 /* (see nuttx/include/configdata.h */
 
 #define _CFGDIOCVALID(c)   (_IOC_TYPE(c)==_CFGDIOCBASE)
-#define _CFGDIOC(nr)         _IOC(_CFGDIOCBASE,nr)
+#define _CFGDIOC(nr)       _IOC(_CFGDIOCBASE,nr)
+
+/* Timer driver ioctl commands **********************************************/
+/* (see nuttx/include/timer.h */
+
+#define _TCIOCVALID(c)     (_IOC_TYPE(c)==_TCIOCBASE)
+#define _TCIOC(nr)         _IOC(_TCIOCBASE,nr)
+
+/* Discrete joystick driver ioctl definitions *******************************/
+/* (see nuttx/include/input/djoystick.h */
+
+#define _DJOYIOCVALID(c)   (_IOC_TYPE(c)==_DJOYBASE)
+#define _DJOYIOC(nr)       _IOC(_DJOYBASE,nr)
+
+/* Analog joystick driver ioctl definitions *********************************/
+/* (see nuttx/include/input/ajoystick.h */
+
+#define _AJOYIOCVALID(c)   (_IOC_TYPE(c)==_AJOYBASE)
+#define _AJOYIOC(nr)       _IOC(_AJOYBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus

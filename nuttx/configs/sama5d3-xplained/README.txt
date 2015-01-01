@@ -79,6 +79,7 @@ Contents
   - TRNG and /dev/random
   - Tickless OS
   - I2S Audio Support
+  - Shields
   - SAMA5D3-Xplained Configuration Options
   - Configurations
   - To-Do List
@@ -461,7 +462,7 @@ Programming U-Boot
 
      http://www.at91.com/linux4sam/bin/view/Linux4SAM/U-Boot#Build_U_Boot_from_sources
 
-     A pre-Built binay image is available here:
+     A pre-Built binary image is available here:
 
      ftp://www.at91.com/pub/uboot/u-boot-v2013.07/u-boot-sama5d3_xplained-v2013.07-at91-r1.bin
 
@@ -798,8 +799,8 @@ Networking
   Networking Support
     CONFIG_NET=y                         : Enable Neworking
     CONFIG_NET_SOCKOPTS=y                : Enable socket operations
-    CONFIG_NET_BUFSIZE=562               : Maximum packet size (MTD) 1518 is more standard
-    CONFIG_NET_RECEIVE_WINDOW=562        : Should be the same as CONFIG_NET_BUFSIZE
+    CONFIG_NET_ETH_MTU=562               : Maximum packet size (MTU) 1518 is more standard
+    CONFIG_NET_ETH_TCP_RECVWNDO=562      : Should be the same as CONFIG_NET_ETH_MTU
     CONFIG_NET_TCP=y                     : Enable TCP/IP networking
     CONFIG_NET_TCPBACKLOG=y              : Support TCP/IP backlog
     CONFIG_NET_TCP_READAHEAD_BUFSIZE=562 : Read-ahead buffer size
@@ -2577,6 +2578,122 @@ I2S Audio Support
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y          : Driver needs work queue support
 
+Shields
+=======
+
+  Support is built in for the following shields:
+
+  Itead Joystick Shield
+  ---------------------
+  See http://imall.iteadstudio.com/im120417014.html for more information
+  about this joystick.
+
+  Itead Joystick Connection:
+
+    --------- ----------------- ---------------------------------
+    ARDUINO   ITEAD             SAMA5D3 XPLAINED
+    PIN NAME  SIGNAL            CONNECTOR  SIGNAL
+    --------- ----------------- ---------- ----------------------
+     D3       Button E Output   J18 pin 4  PC8
+     D4       Button D Output   J18 pin 5  PC28
+     D5       Button C Output   J18 pin 6  PC7
+     D6       Button B Output   J18 pin 7  PC6
+     D7       Button A Output   J18 pin 8  PC5
+     D8       Button F Output   J15 pin 1  PC4
+     D9       Button G Output   J15 pin 2  PC3
+     A0       Joystick Y Output J17 pin 1  PC18  AD0 (function 4)
+     A1       Joystick X Output J17 pin 2  PD21  AD1 (function 1)
+    --------- ----------------- ---------- ----------------------
+
+    All buttons are pulled on the shield.  A sensed low value indicates
+    when the button is pressed.
+
+  Possible conflicts:
+
+    ---- ----- --------------------------------------------------
+    ARDU SAMA5 SAMA5D3 XPLAINED
+    PIN  GPIO  SIGNAL            FUNCTION
+    ---- ----- ----------------- --------------------------------
+     D3  PC8   EMDC              10/100Mbit Ethernet MAC
+     D4  PC28  SPI1_NPCS3/ISI_D9 SPI1/ISI
+     D5  PC7   EREFCK            10/100Mbit Ethernet MAC
+     D6  PC6   ECRSDV            10/100Mbit Ethernet MAC
+     D7  PC5   ECRSDV            10/100Mbit Ethernet MAC
+     D8  PC4   ETXEN             10/100Mbit Ethernet MAC
+     D9  PC3   ERX1              10/100Mbit Ethernet MAC
+     A0  PC18  RK0               SSC/Audio
+     A1  PC21  RD0               SSC/Audio
+    ---- ----- ----------------- --------------------------------
+
+  Itead Joystick Signal interpretation:
+
+    --------- ----------------------- ---------------------------
+    BUTTON     TYPE                    NUTTX ALIAS
+    --------- ----------------------- ---------------------------
+    Button A  Large button A          JUMP/BUTTON 3
+    Button B  Large button B          FIRE/BUTTON 2
+    Button C  Joystick select button  SELECT/BUTTON 1
+    Button D  Tiny Button D           BUTTON 6
+    Button E  Tiny Button E           BUTTON 7
+    Button F  Large Button F          BUTTON 4
+    Button G  Large Button G          BUTTON 5
+    --------- ----------------------- ---------------------------
+
+  Itead Joystick configuration settings:
+
+    System Type -> SAMA5 Peripheral Support
+      CONFIG_SAMA5_ADC=y               : Enable ADC driver support
+      CONFIG_SAMA5_TC0=y               : Enable the Timer/counter library need for periodic sampling
+      CONFIG_SAMA5_EMACA=n             : 10/100Mbit Ethernet MAC conflicts
+      CONFIG_SAMA5_SSC0=n              : SSC0 Audio conflicts
+      CONFIG_SAMA5_SPI1=?              : SPI1 might conflict if PCS3 is used
+      CONFIG_SAMA5_ISI=?               : ISIS conflics if bit 9 is used
+
+    System Type -> PIO Interrupts
+      CONFIG_SAMA5_PIO_IRQ=y           : PIO interrupt support is required
+      CONFIG_SAMA5_PIOC_IRQ=y          : PIOC interrupt support is required
+
+    Drivers
+      CONFIG_ANALOG=y                  : Should be automatically selected
+      CONFIG_ADC=y                     : Should be automatically selected
+      CONFIG_INPUT=y                   : Select input device support
+      CONFIG_AJOYSTICK=y               : Select analog joystick support
+
+    System Type -> ADC Configuration
+      CONFIG_SAMA5_ADC_CHAN0=y         : These settings enable the sequencer to collect
+      CONFIG_SAMA5_ADC_CHAN1=y         : Samples from ADC channels 0-1 on each trigger
+      CONFIG_SAMA5_ADC_SEQUENCER=y
+      CONFIG_SAMA5_ADC_TIOA0TRIG=y     : Trigger on the TC0, channel 0 output A
+      CONFIG_SAMA5_ADC_TIOAFREQ=10     : At a frequency of 10Hz
+      CONFIG_SAMA5_ADC_TIOA_RISING=y   : Trigger on the rising edge
+
+    Default ADC settings (like gain and offset) may also be set if desired.
+
+    System Type -> Timer/counter Configuration
+      CONFIG_SAMA5_TC0_TIOA0=y         : Should be automatically selected
+
+    Library routines
+      CONFIG_SCHED_WORKQUEUE=y         : Work queue support is needed
+
+  There is nothing in the configuration that currently uses the joystick.
+  For testing, you can add the following configuration options to enable the
+  analog joystick example at apps/examples/ajoystick:
+
+    CONFIG_NSH_ARCHINIT=y
+    CONFIG_EXAMPLES_AJOYSTICK=y
+    CONFIG_EXAMPLES_AJOYSTICK_DEVNAME="/dev/ajoy0"
+    CONFIG_EXAMPLES_AJOYSTICK_SIGNO=13
+
+  STATUS:
+  2014-12-03:  As nearly I can tell, the Itead Joystick shield cannot be
+    used with the SAMA5D3-Xplained.  I believe that the EMAC PHY chip is
+    enableed and since it shares pins with the Joystick, it interferes with
+    the Joystick inputs.  There is probably more wrong than this; perhaps I
+    am not setting up the pins correctly.  But having seen the states of the
+    button output pins change when powering up the board, I have lost hope
+    of getting the shield to work on this board.  I leave the
+    implementation in place only for reference.
+
 SAMA5D3-Xplained Configuration Options
 =================================
 
@@ -2865,6 +2982,8 @@ Configurations
   Summary:  Some of the descriptions below are long and wordy. Here is the
   concise summary of the available SAMA5D3-Xplained configurations:
 
+    bridge:  This is a simple testing that exercises EMAC and GMAC for
+      a simple UDP relay bridge test.
     nsh:  This is another NSH configuration, not too different from the
       demo configuration.  The nsh configuration is, however, bare bones.
       It is the simplest possible NSH configuration and is useful as a
@@ -2874,6 +2993,68 @@ Configurations
   before of the status of individual configurations.
 
   Now for the gory details:
+
+  bridge:
+
+    This is a simple testing that exercises EMAC and GEMAC for a simple
+    UDP relay bridge test using apps/examples/bridge.  See
+    apps/examples/README.txt for more information about this test.
+
+
+    NOTES:
+
+    1. This configuration uses the default DBGU serial console.  That
+       is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as
+       the console device.
+
+    2. By default, this configuration is set up to build on Windows
+       under either a Cygwin or MSYS environment using a recent, Windows-
+       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       toolchain).  Both the build environment and the toolchain
+       selection can easily be changed by reconfiguring:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
+       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+       If you are running on Linux, make *certain* that you have
+       CONFIG_HOST_LINUX=y *before* the first make or you will create a
+       corrupt configuration that may not be easy to recover from. See
+       the warning in the section "Information Common to All Configurations"
+       for further information.
+
+    3. This configuration executes out of SDRAM flash and is loaded into
+       SDRAM from NAND, Serial DataFlash, SD card or from a TFTPC sever via
+       U-Boot or BareBox.  Data also is positioned in SDRAM.
+
+       I did most testing with nuttx.bin on an SD card.  These are the
+       commands that I used to boot NuttX from the SD card:
+
+         U-Boot> fatload mmc 0 0x20008000 nuttx.bin
+         U-Boot> go 0x20008040
+
+    4. You will almost certainly need to adapt this configuration to
+       work in your network environment.  I did all testing with a
+       single 10.0.0.xx network and a 4+1 port switch:
+
+       - Host PC IP 10.0.0.1
+       - Target GMAC IP: 10.0.0.2
+       - Target EMAC IP: 10.0.0.3
+
+       Host PC, EMAC, and GMAC were all connected using an Ethernet
+       switch to the same 255.255.255.0 network.
+
+    STATUS:
+
+      2014-11-20:  Configuration created.  Partially verified.  Both the
+        EMAC and GMAC appear to be function; both respond to pings from
+        the host PC.  But I cannot perform the full bridge test yet
+        because there still is no host-side test driver in apps/examples/bridge.
+      2014-11-21:  Added the host-side test driver and correct a number
+        of errors in the test logic.  The testing is working (according
+        to WireShark), but I an having some procedural issues related to
+        the Windows firewall.
 
   nsh:
 

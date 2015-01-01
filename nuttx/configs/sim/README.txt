@@ -14,6 +14,7 @@ Contents
     - Stack Size Issues
     - Networking Issues
     - X11 Issues
+  o BASIC
   o Configurations
 
 Overview
@@ -165,6 +166,96 @@ The X11 examples builds on Cygwin, but does not run.  The last time I tried it,
 XOpenDisplay() aborted the program.  UPDATE:  This was caused by the small stack
 size and can be fixed by increasing the size of the NuttX stack that calls into
 X11.  See the discussion "Stack Size Issues" above.
+
+BASIC
+^^^^^
+
+BASIC
+=====
+  I have used the sim/nsh configuration to test Michael Haardt's BASIC interpreter
+  that you can find at apps/interpreters/bas.
+
+    Bas is an interpreter for the classic dialect of the programming language
+    BASIC.  It is pretty compatible to typical BASIC interpreters of the 1980s,
+    unlike some other UNIX BASIC interpreters, that implement a different
+    syntax, breaking compatibility to existing programs.  Bas offers many ANSI
+    BASIC statements for structured programming, such as procedures, local
+    variables and various loop types.  Further there are matrix operations,
+    automatic LIST indentation and many statements and functions found in
+    specific classic dialects.  Line numbers are not required.
+
+  There is also a test suite for the interpreter that can be found at
+  apps/examples/bastest.
+
+  Configuration
+  -------------
+  Below are the recommended configuration changes to use BAS with the
+  stm32f4discovery/nsh configuration:
+
+  Dependencies:
+    CONFIG_LIBC_EXECFUNCS=y      : exec*() functions are required
+    CONFIG_LIBM=y                : Some floating point library is required
+    CONFIG_LIBC_FLOATINGPOINT=y  : Floating point printing support is required
+    CONFIG_LIBC_TMPDIR="/tmp"    : Writable temporary files needed for some commands
+
+  Enable the BASIC interpreter.  Other default options should be okay:
+    CONFIG_INTERPRETERS_BAS=y    : Enables the interpreter
+    CONFIG_INTERPREPTER_BAS_VT100=y
+
+  The BASIC test suite can be included:
+     CONFIG_FS_ROMFS=y           : ROMFS support is needed
+     CONFIG_EXAMPLES_BASTEST=y   : Enables the BASIC test setup
+     CONFIG_EXAMPLES_BASTEST_DEVMINOR=6
+     CONFIG_EXAMPLES_BASTEST_DEVPATH="/dev/ram6"
+
+  Usage
+  -----
+  This setup will initialize the BASIC test (optional):  This will mount
+  a ROMFS file system at /mnt/romfs that contains the BASIC test files:
+
+  nsh> bastest
+  Registering romdisk at /dev/ram6
+  Mounting ROMFS filesystem at target=/mnt/romfs with source=/dev/ram6
+  nsh>
+
+  The interactive interpreter is started like:
+
+  nsh> bas
+  bas 2.4
+  Copyright 1999-2014 Michael Haardt.
+  This is free software with ABSOLUTELY NO WARRANTY.
+  >
+
+  Ctrl-D exits the interpreter.
+
+  The test programs can be ran like this:
+
+  nsh> bastest
+  Registering romdisk at /dev/ram0
+  Mounting ROMFS filesystem at target=/mnt/romfs with source=/dev/ram0
+  nsh> bas /mnt/romfs/test01.bas
+   1
+  hello
+   0.0002
+   0.0000020
+   0.0000002
+
+  nsh>
+
+  Or you can load a test into memory and execute it interactively:
+
+  nsh> bas
+  bas 2.4
+  Copyright 1999-2014 Michael Haardt.
+  This is free software with ABSOLUTELY NO WARRANTY.
+  > load "/mnt/romfs/test01.bas"
+  > run
+   1
+  hello
+   0.0002
+   0.0000020
+   0.0000002
+  >
 
 Configurations
 ^^^^^^^^^^^^^^
@@ -550,3 +641,44 @@ touchscreen
 
   See apps/examples/README.txt for further information about build
   requirements and configuration settings.
+
+traveler
+
+  Configures to build the Traveler first person, 3-D ray casting game at
+  apps/graphics/traveler.  This configuration derives fromthe nx11
+  configuration and many of the comments there appear here as well.
+  This configuration defpends on X11 and, of course, can only be used in
+  environments that support X11!  (And it may not even be usable in all of
+  those environments without some "tweaking").
+
+  1. Special Framebuffer Configuration
+
+     This configuration uses the same special simulated framebuffer
+     configuration options as the nx configuration:
+
+       CONFIG_SIM_X11FB    - Use X11 window for framebuffer
+       CONFIG_SIM_FBHEIGHT - Height of the framebuffer in pixels
+       CONFIG_SIM_FBWIDTH  - Width of the framebuffer in pixels.
+       CONFIG_SIM_FBBPP    - Pixel depth in bits
+
+  2. X11 Configuration
+
+     But now, since CONFIG_SIM_X11FB is also selected the following
+     definitions are needed
+
+       CONFIG_SIM_FBBPP (must match the resolution of the display).
+       CONFIG_FB_CMAP=y
+
+     My system has 24-bit color, but packed into 32-bit words so
+     the correct setting of CONFIG_SIM_FBBPP is 32.
+
+  3. X11 Build Issues
+
+     To get the system to compile under various X11 installations
+     you may have to modify a few things.  For example, in order
+     to find libXext, I had to make the following change under
+     Ubuntu 9.09:
+
+       cd /usr/lib/
+       sudo ln -s libXext.so.6.4.0 libXext.so
+

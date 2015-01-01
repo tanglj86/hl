@@ -12,7 +12,7 @@
 	* Corrected error in reading from the C5471 serial port:
 	  Improper use of semaphore can cause deadlock.
 	* Fixed an error in the memory cleanup:  The idle task
-	  cannot take sempahores (because it must always be ready
+	  cannot take semaphores (because it must always be ready
 	  to run).
 	* Tasks can now accept a configurable maximum number of
 	  input parameters (argc)
@@ -28,7 +28,7 @@
 	* Added strtok() and strtok_r()
 	* Added a simple shell called nsh (see examples/nsh).
 	* Platform support for 8052 is complete but not stable
-	  when the timer interrupt is enabled.	Seems to be an
+	  when the timer interrupt is enabled.  Seems to be an
 	  issue when SP enters indirect address space.
 	* Documentation updates
 
@@ -8684,7 +8684,7 @@
 	* fs/fs_poll.c:  Re-implemented poll() delay using sem_timedwait()
 	  (2014-9-26).
 
-7.6 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.6 2014-11-26 Gregory Nutt <gnutt@nuttx.org>
 
 	* fs/fs.h and other files:  Rename fs/fs_internal.h to fs/fs.h (2014-9-28).
 	* include/nuttx/semaphore.h and fs/fs.h:  Add data structures that will
@@ -8699,7 +8699,7 @@
 	* fs/semaphore: Create a build structure that will (eventually) support
 	  using the VFS to manage named semaphores (2014-9-23).
 	* configs/stm32f4discovery/include/board.h: STM32F4-Discovery: Fix some
-	  backward conditional compilation"(2104-9-29).
+	  backward conditional compilation (2104-9-29).
 	* nuttx/sched/init/os_start.c, semaphore/Make.defs, sem_initialize.c,
 	  and semaphore.h: Semaphore initialization is now only required if
 	  priority inheritance is enabled (2014-9-29).
@@ -8726,7 +8726,7 @@
 	  NuttX via standard NuttX domain IPCs (2014-9-30).
 	* arch/sim/src/up_setjmp32.S, up_setjmp64.S, Kconfig, Makefile,
 	  up_initialstate.c, up_internal.h, up_stackframe.c, and include/irq.h:
-	  Add support for 64-bit lonjmp/setjmp in simulator platform.  This
+	  Add support for 64-bit longjmp/setjmp in simulator platform.  This
 	  will permit operation of the simulation natively on a 64-bit platform
 	  (2014-10-2).
 	* include/fcntl.h: Implement create() as a macro (2014-10-4).
@@ -8766,12 +8766,12 @@
 	  Modify FS initialization logic to handle AIO container
 	  initialization (2014-10-6).
 	* Too many files to list:  Major structuring of file system functions
-	  to better support asynchronous I/O.  Respository should not be
+	  to better support asynchronous I/O.  Repository should not be
 	  trusted until I have a chance to verify everything (2014-10-6).
 	* include/nuttx/mm/mm.h: Fix a place in the memory manager where it
-	  explicitly assumed that the size of a point is 4 bytes.  That is OK
-	  if the actually size is smaller but makes the heap unstable when
-	  used with the x86_64 host simulation (2014-10-6).
+	  explicitly assumed that the size of a pointer is 4 bytes.  That is OK
+	  if the actual size is smaller but makes the heap unstable when used
+	  with the x86_64 host simulation (2014-10-6).
 	* sched/wqueue, include/nuttx/wqueue.h,  and libc/Kconfig sched/Makefile:
 	  Add support for priority inheritance on the low priority worker queue
 	  (2014-10-7).
@@ -8833,7 +8833,7 @@
 	  Fix watchdog stop bit usage.  From Lazlo (2014-10-10).
 	* sched/wqueue/, libc/wqueue, and include/nuttx/wqueue.h:  Add support
 	  for multiple low-priority worker threads.  This is a necessary
-	  piece of the support for asynchonous I/O (2014-10-10).
+	  piece of the support for asynchronous I/O (2014-10-10).
 	* sched/wqueue/work_inherit.c:  Add logic for priority inheritance with
 	  multiple worker threads.  How should this work?  Tentatively, the all
 	  get reprioritized together.  It would be best to just reprioritize the
@@ -8847,7 +8847,7 @@
 	* configs/Kconfig, README.txt, and nucleo-f401re:  Extend this board
 	  configuration to also support the Nucleo-F411RE.  From Serg Podtynnyi
 	  (2014-10-14).
-	* tools/Config.mk: "Add a PRELINK macro to Config.mk.  From Kriegleder
+	* tools/Config.mk:  Add a PRELINK macro to Config.mk.  From Kriegleder
 	  (2014-10-17).
 	* arch/arm/src/efm32 and arch/arm/include/efm32: Add a basic port for
 	  the SiLabs EFM32 family.  Includes many files contributed by Pierre-noel
@@ -8862,7 +8862,7 @@
 	  STM32F429i Discovery's LCD.  From Marco Krahl (2014-10-20).
 	* arch/arm/src/lpc43xx/lpc43_gpioint.c, .h, lpc43_irq.c, and
 	  chip/lpc43_gpio.h: Fixes to allow compile of lpc43_gpioint.c.  It
-	  likely doesn't work.  From Brandon warhurst_002 (2014-10-21).
+	  likely doesn't work.  From Brandon Warhurst (2014-10-21).
 	* arch/arm/src/stm32/chip/stm32f103r_pinmap.h: Add ADC pinmap
 	  definitions for the STM32 F103R from Martin Lederhilger  (2014-10-21).
 	* arch/arm/src/armv7-m/up_itm.c and itm.h: Add CMSIS ITM header file and
@@ -8888,18 +8888,476 @@
 	  compilation errors in up_itm_syslog.c.  From  Pierre-Noel Bouteville
 	  (2014-10-23).
 	* configs/sam4e-ek/src/sam_ethernet.c (and other files):SAM4E-EK: Add
-	  support for PHY insterrupt (2014-10-24).
+	  support for PHY interrupt (2014-10-24).
 	* include/wchar.h:  Add a mostly bogus wchar.h header file.  This file
-	  is mostly bogus because noneo of the wide character operations are
+	  is mostly bogus because none of the wide character operations are
 	  currently supported in the Nuttx C library (2014-10-27).
 	* include/termios.h, libc/termios/lib_isatty.c, and Make.defs: Add
 	  isatty() function. From  Alan Carvalho de Assis (2014-10-27).
 	* arch/arm/include/efm32, src/efm32, and configs/efm32-gxxx-stk:
 	  The EFM32 Gecko Starter Kit port is now functional.  At least
 	  NSH is running over LEUART0 on the board (2014-10-29).
-	* arch/arm/src/sm34/sam_serial.c and Kconfig:  Add support for SAM3/4
+	* arch/arm/src/sam34/sam_serial.c and Kconfig:  Add support for SAM3/4
 	  basic TERMIOS and flow control.  There are issues with IFLOW control:
 	  PDC or DMAC support is required (2014-10-29).
 	* configs/sam4e-ek/src/sam4e-ek.h: Fix an error in a USART1 pin number
 	  (2014-10-29).
+	* configs/efm32gg-stk3700:  Board support for the SiLbas EFM32GG
+	  Giant Gecko Starter kit.  Current with basic NSH configuration only.
+	  Testing is on hold until I receive hardware (2014-11-03).
+	* libc/Kconfig: Move CONFIG_NSH_TMPDIR to CONFIG_LIBC_TMPDIR (2014-11-05).
+	* libc/stdlib/lib_mkstemp.c, lib_mktemp.c, Make.defs and include/stdlib.h:
+	  Add mktemp() and mkstemp() (2014-11-05).
+	* libc/stdio/lib_tempnam.c, lib_tmpnam.c, Kconfig, Make.defs and
+	  include/stdio.h: Add tmpnam() and tempnam() (2014-11-05).
+	* drivers/rwbuffer.c: Fix typo that can cause compiler error (2014-11-05).
+	* drivers/mtd/m25px.c: Extend MTD support to M25P16. From Sébastien
+	  Lorquet (2014-11-07).
+	* arch/arm/src/stm32/Kconfig, chip.h, and include/stm32/chip.h: Support
+	  for the STM32F103RG.  From Murilo Ponte (2014-11-10).
+	* configs/stm32f100rc_generic:  Removed this generic board configuration.
+	  I have decided to stop support of generic board configurations.  Generic
+	  board configurations do not provide support for any specific hardware
+	  but can be useful only if there are not other examples for the setup
+	  for a particular architecture. Not the case here (2014-11-10).
+	* include/nuttx/vt100.h: Add foreground and background color commands
+	  (2014-11-10).
+	* sched/wdog/wd_create.c: Fix an important bug in the watchdog creation
+	  logic (2014-11-10).
+	* include/unistd.h, libc/unistd/lib_access.c and Make.defs: From Lorenz
+	  Meier: The implementation of access() as vararg macro has the issue that
+	  any function call with the same name (even in a C++ class) will match
+	  with it and result in a compile error. I have replaced it with a small
+	  function, and tried to have decent documentation as well. This resolves
+	  the compile issue, and shouldn’t have negative side effects for users
+	  of the function (2014-11-11).
+	* mm/mm_gran/mm_granrelease.c:  If the INTR granule allocator mode is
+	  enabled, there is no semaphore to destroy.  From Lorenz Meier (2014-11-12).
+	* fs/nxffs/nxffs_dump.c: Fix problems with redefinitions of fdb macro.
+	  With the fix to the syslog prototype, a LOG priority must now be the
+	  first parameter.  Fixed by replacing all occurrences of fdbg with
+	  syslog(LOG_DEBUG, and eliminating the macro redefinitions.  Noted by
+	  Sebastien Lorquet (2014-11-12).
+	* arch/arm/src/common/up_internal.h: Add protection from C++ name
+	  mangling in the ARM up_internal.h.  From Lorenz Meier (2014-11-12).
+	* include/nuttx/compiler.h:  Defines inline functions as not
+	  instrumented - this is relevant for anyone using instrumentation.  From
+	  Lorenz Meier (2014-11-12).
+	* libc/string/lib_strncpy.c:  The definition of strncpy() is that empty
+	  space should be zero-filled, the patch adds the zero filling (I didn’t
+	  know this, see e.g. the POSIX spec here:
+	  http://pubs.opengroup.org/onlinepubs/7908799/xsh/strncpy.html). From
+	  Lorenz Meier (2014-11-12).
+	* arch/arm/include/limits.h:  Remove the definition of INT_FAST32_MIN
+	  which is already defined in stdint.h (the correct location).  From
+	  Lorenz Meier (2014-11-12).
+	* arch/arm/src/efm32/efm32_clockconfig.c, configs/efm32gg-stk3700/README.txt
+	  and include/board.h:  Fixes to get the EFM32GG-STK3700 basic NSH
+	  configuration running.  It works! (2014-11-12).
+	* drivers/bch/bchdev_driver.c: Add support for seeking in BCH.  From
+	  Sébastien Lorquet. (2014-11-13).
+	* sched/Kconfigs and configs/*/*/defconfig:  Remove CONFIG_MAX_TASK_ARGS
+	  (2014-11-13).
+	* binfmt/: Remove use of CONFIG_MAX_TASK_ARGS in exec() and unload_module()
+	  (2014-11-13).
+	* libc/unistd:  Remove use of CONFIG_MAX_TASK_ARGS in execl() (2014-11-13).
+	* sched/: Remove some misc. usage of CONFIG_MAX_TASK_ARGS in task_start(),
+	  task_setup(), and vfork() (2014-11-13).
+	* arch/arm/src/stm32/chip/stm32_otgfs.h: Correct a typo in the STM32 OTGFS
+	  register bit definitions (2014-11-13).
+	* drivers/lcd/st7565.c/.h and include/nuttx/lcd/st7565.h: Add driver for
+	  ST7565 that works with NHD‐C12864KGZ display.  From Pierre-noel
+	  Bouteville (2014-11-13).
+	* net/route/net_router.c:  I don't think that the net_route function has
+	  ever worked correctly.  The source ip was updated in the match struct
+	  instead of the route ip.  From Brennan Ashton (2014-11-14).
+	* net/Kconfig arp/Make.defs, arp_send.c, and drivers/net/slip.c: ARP:
+	  Add support for the case where there are multiple networks:  One being
+	  Ethernet and the other not.  Suggested by Brennan Ashton (2014-11-14).
+	* net/Kconfig, netdev/netdev_register.c, arp/arp_send.c,
+	  include/nuttx/net/net.h, netdev.h and several network drivers in arch/
+	  and drivers/: Add a parameter to netdev_register() to indicate the
+	  link protocol supported by the driver.  Use this value to replace some
+	  logic committed yesterday (2014-11-15).
+	* configs/stm32f4discovery/netnsh/defconfig:  Needs to set MAC address
+	  (2014-11-15).
+	* arch/ and drivers/: Remove use of NET_LL_HDRLEN from Ethernet drivers.
+	  Use ETH_HDRLEN instead (2014-11-15).
+	* net/arp/: Remove use of NET_LL_HDRLEN from net/arp logic.  Use
+	  ETH_HDRLEN instead (2014-11-15).
+	* net/ and include/nuttx/net:  All network logic will now handle
+	  variable length link layer protocol headers within incoming packets.
+	  This permits use of multiple network interfaces with differing data
+	  links.  For example, ETHERNET + SLIP (2014-11-15).
+	* arch/arm/src/sam34/sam4s_periphclks.h:  Add missing SPI0 clock
+	  configuration macro for the SAM4S.  From spasbyspas (2014-11-16).
+	* arch/arm/src/efm32/efm32_lowputc.c: EFM32 USART setup: Computation of
+	  BAUD includes shift; Eliminate additional shift.  From  Pierre-noel
+	  Bouteville (2014-11-16).
+	* net/, include/, drivers/, arch/, various files:  Rename
+	  CONFIG_NET_BUFSIZE to CONFIG_NET_ETH_MTU; Add CONFIG_NET_SLIP_MTU.
+	  Add data structures and logic to handle different MTUs when both
+	  Ethernet and SLIP are enabled (2014-11-16).
+	* net/, include/, various files:  Rename CONFIG_NET_RECEIVE_WINDOW to
+	  CONFIG_NET_ETH_TCP_RECVWNDO and CONFIG_NET_SLIP_TCP_RECVWNDO.  Add
+	  data structures and logic to handler different TCP receive windows
+	  when both Ethernet and SLIP are enabled (2014-11-16).
+	* configs/sama5d4-ek/bridge: Add a simple test for the dual EMACs on
+	  the SAMA5D4 (2014-11-17).
+	* arch/arm/src/sama5/sam_emacb.c:  Fix several typos that will prevent
+	  EMAC1 from initializing properly (2014-11-17).
+	* include/nuttx/net/ip.h and tcp.h, net/icmp/icmp_send.c and
+	  igmp/igmp_send.c: Move IP header flags from tcp.h to ip.h and rename
+	  IP_FLAGS vs TCPFLAGS.  The problem fixed here is that there IP flags
+	  were not available when TCP was disabled.  The IP flags are used in
+	  ICMP and IGMP (2014-11-17).
+	* sched/clock/clock_abstime2ticks.c: Calling mq_timedreceived() with
+	  immediate timeout was getting stuck and not timing out. Immediate
+	  timeout is achieved by setting absolute timeout value to past time,
+	  for example abstime={ .tv_sec=0, .tv_nsec=0 }. However absolute
+	  time was converted to relative time using unsigned integer arithmetic
+	  and resulted large ticks count by clock_abstime2ticks, instead of
+	  expected negative ticks value.  Change corrects clock_abstime2ticks()
+	  to return negative ticks, if absolute time is in the past.  From
+	  Jussi Kivilinna (2014-11-19).
+	* fs/vfs/fs_poll.c: poll() was not waking up from signals (for example
+	  mq_notify() events).  From Jussi Kivilinna (2014-11-19).
+	* arch/arm/src/stm32/stm32_otghs.c, Make.defs,
+	  configs/stm32f429i-disco/src/stm32_usb.c and Makefile: STM32 F4 OTGHS
+	  device controller driver from Brennan Ashton (2014-11-20).
+	* configs/sama5d3-xplained/bridge: Add a simple test for the the EMAC
+	  and GMAC on the SAMA5D3 working together (2014-11-20).
+	* libnx/nxtk/nxtk_drawframe.c: Remove warnings when CONFIG_NXTK_BORDERWIDTH
+	  is set to zero.  From Pierre-Noel Bouteville (2014-11-20).
+	* fs/vfs/fs_poll.c: Add proper handling for sem_timedwait errnos.
+	  From Jussi Kivilinna (2014-11-21).
+	* net/udp/udp_conn.c and udp.h:  Extensions to UDP "connection" structure
+	  for the case of multiple networks.  In this case, assigned port numbers
+	  only have to be unique with respect to the IP address.  So, for
+	  example, you could have multiple port 80's, one on each network
+	  (2014-11-21).
+	* net/tcp/tcp_conn.c and tcp.h: Make tcp_listener static scope; it is
+	  not used outside of tcp_conn.c (2014-11-22).
+	* net/udp/tcp_conn.c and tcp.h:  Extensions to TCP connection structure
+	  for the case of multiple networks.  See the description of the similar
+	  change for UDP above (2014-11-22).
+	* net/route/net_router.c:  Refuse to perform routing table lookups for
+	  the Broadcast IP address.  From Brennan Ashton.
+	* net/netdev/netdev_findbyaddr.c and netdev:  Add logic to netdev_findbyaddr()
+	  to return the correct network device for the case where a broadcast
+	  address is used.  This change caused trivial ripples through other
+	  files because additional parameters are required for netdev_findbyaddr()
+	  when CONFIG_NET_MULTINIC.  Those other file include net/netdev/netdev_rxnotify.c,
+	  netdev_txnotify.c which, in turn, for changes to arp/arp_send.c,
+	  icmp/icmp_ping.c, socket/net_sendfile.c, recvfrom.c, sendto.c,
+	  tcp/tcp_send_buffered.c, and tcp_send_unbuffered.c (2014-11-23).
+	* arch/arm/src/kl/chip/kl_i2c.h:  I2C header file for the Freescale KL
+	  family.  From Alan Carvalho de Assis (2014-11-23).
+	* include/nuttx/fs/fs.h: Fix typo in conditional compilation.  From
+	  Alan Carvalho de Assis (2014-11-23).
 
+7.7 2015-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* nuttx/drivers/eeprom and include/nuttx/eeprom/: Add support for generic
+	  EEPROM access via a character driver.  Add also the EEPROM driver itself.
+	  From Sébastien Lorquet (2014-11-26).
+	* libnx/nxfonts/nxfonts_pixel-lcd-machine.h and nxfonts_pixel-unicode.h,
+	  include/nuttx/nx/nxfonts.h, graphpics/Kconfig, and build-related files
+	  in libnx/nxfonts: Two new fonts from Pierre-noel Bouteville (2014-11-26).
+	* configs/lpc4357-evb, arch/arm/src/pc43xx/chip/, configs/Kconfig, and
+	  and other related files:  A port of NuttX to the LPC4357-EVB from
+	  Toby Duckworth.  This port is a leverage of the LPC3330-Xplorer port
+	  and still have a some misinformation from that port that needs to be
+	  updated for the LPC4357-EVB (2014-11-26).
+	* arch/arm/include/stm32/chip.h, src/stm32/Kconfig, chip.h, and
+	  chip/stm32f102_pinmap.h:  Enable support for the STM32 F102.  From
+	  https://github.com/PX4/NuttX/pull/28.diff (2014-11-27).
+	* drivers/loop.c:  Loop device should return -EINTR is interrupt by a
+	  signal (2014-11-27).
+	* drivers/input/djoystick.c and include/nuttx/input/djoystick.h.  Also
+	  drivers/input/Kconfig and Make.defs, and include/nuttx/fs/ioctl.h: Add
+	  an interface definition and upper half driver for a discrete joystick
+	  device (2014-11-27).
+	* arch/arm/src/efm32/Kconfig and efm32_serial.c: Add support for serial
+	  termios TCGET and TCSET.  For the moment, only set/get speed is
+	  implemented.  From Pierre-noel Bouteville (2014-11-27).
+	* drivers/wireless/ and include/nuttx/wireless/cc3000.h:  A set of 11
+	  patches correcting issues with the CC3000 networking.  All from Jussi
+	  Kivilinna (2014-11-28).  Among these:
+	  03/11: CC3000 driver was getting stuck at recv() when remote host
+	    closed connection and application tried to read data from remotely
+	    shutdown socket. This patch adds proper handling for remotely closed
+	    socket event.
+	  07/11: Socket state initialization was done in 'register', while it
+	    should be initialized in 'open' and deinitialized in 'close'. Old
+	    way caused problems when device is closed, power-cycled and then
+	    reopened as old socket state was left enabled.
+	  08/11: Select thread was getting stuck after 'close, power-cycle,
+	    reopen', since selectsem was not properly setup and cleaned up.
+	  09/11: 'maxFD' was not properly reset in select worker and not checked
+	    for before calling cc3000_select().
+	  10/11: After wlan_stop()/cc3000_close(), irqsem was left with count
+	    '-1'. Therefore on next wlan_start()/cc3000_open(), initial value
+	    for irqsem was wrong. Additional repeated wlan_start()/wlan_stop()
+	    decreased irqsem value further. Obviously this causes driver not to
+	    function correctly and freeze. Patch moves initialization and
+	    destruction of waitsem, irqsem and readysem to
+	    cc3000_open/cc3000_close.
+	* include/cxx/cctype: Undefine macros defined ctype.h so that builtin
+	  C++ implementations will be used intead.  From Lorenz Meier
+	  (2014-11-28).
+	* configs/stm3210e-eval/src/stm32_djoystick.c:  Add a discrete Joystick
+	  supportfor the STM3210E-EVAL (2014-11-28).
+	* drivers/input/djoystick.c include/nuttx/input/djoystick.h: Add a new
+	  ioctl to get the supported joystick discrete signals (2014-11-28).
+	* drivers/input/ajoystick.c and include/nuttx/input/ajoystick.h.  Also
+	  drivers/input/Kconfig and Make.defs, and include/nuttx/fs/ioctl.h: Add
+	  an interface definition and upper half driver for an analog joystick
+	  device. Initial check-in is only a little more of a clone of the
+	  discrete joystick driver and is as-of-yet untested (2014-11-27).
+	* libc/Kconfig, misc/Make.defs, misc/lib_ioctl.c, fs/vfs/fs_ioctl.c,
+	  include/nuttx/fs/fs.h, include/sys/ioctl.h, syscall.h, and several
+	  files in syscall/: Add support for a variadic ioctl() function.  The
+	  ioctl() interface is a non-standard, Unix interface.  NuttX has always
+	  used the older, three-parameter version.  Most contemporary systems
+	  now, however, use a variadic form of the ioctl() function.  Added an
+	  option to insert a shim layer to adapt the three-parameter ioctl() to
+	  use the variadic interface form.  Internally, the ioctl handling is
+	  the same three-parameter logic.  The only real complexity to the shim
+	  is in how the system calls must be handled (2014-11-29).
+	* arch/arm/src/stm32/stm32_i2c.c: Port Tridge's I2C noise resilience
+	  logic from the PX4 repository (2014-11-29).
+	* arch/arm/src/stm32/chip/stm32l15xxx_pinmap.h:  Fix a typo in the
+	  MCO pin definition.  From Jussi Kivilinna (2014-12-02).
+	* arch/arm/src/stm32/stm32_rcc.h:  Add missing MCO configuration for
+	  the STM32L1xxx.  From Jussi Kivilinna (2014-12-02).
+	* configs/sama5d3-xplained/src/sam_ajoystick.c:  Add analog Joystick
+	  shield support for the SAMA5D3 Xplained board (2014-12-3).
+	* configs/ucleo-f4x1re/src/sam_ajoystick.c and sam_adc.c:  Add
+	  analog Joystick shield support for the Nucleo F4x1RE boards.  There
+	  are still some ADC issues to be worke through as of the initial
+	  commit (2014-12-3).
+	* /drivers/eeprom/spi_xx25xx.c and /include/nuttx/eeprom/spi_xx25xx.h:
+	  Add support for ST Micro EEPROM device geometries.  From Sebastien
+	  Lorquet (2014-12-5).
+	* sched/mqueue: msg type should be char * not void * in mq_send,
+	  mq_timedsend, mq_receive, and mq_timedreceive.  Noted by  Pierre-Noel
+	  Bouteville (2014-12-05).
+	* fs/mqueue/mq_open.c and sched/mqueue/mq_msgqalloc.c: In message queue
+	  creation return ENOSPC error if size exceeds the configured size of
+	  pre-allocated messages; Use ENOSPC vs ENOMEM per OpenGroup.org.  From
+	  Pierre-Noel Bouteville (2014-12-6).
+	* Add sys/custom_file.h.  Used when CUSTOM_FILE_IO is define and avoids
+	  re-definition errors about the FILE define.  From Thomas Gruber via
+	  the PX4 repository (2014-12-06).
+	* tools/bfd-converter.c and mkdeps.c:  Eliminate a warnging about
+	  redefined strtok_r on some platforms (2014-12-8).
+	* arch/sim/Kconfig:  Allow building the simulated framebuffer driver
+	  even if NX is not enabled (12014-12-8).
+	* configs/sim/traveler and README.txt:  Add a configuration build and test
+	  the Traveler firt person game using the simualtor (2014-12-8).
+	* arch/arm/src/stm32/chip/stm32f20xxx_pinmap.h and stm32f40xxx_pinmap.h:
+	  Set the GPIO_SPEED_50MHz on all F2 and F4 SPI pin configurations.
+	  This is based on an F411 SPI1 errata but the fixed is generalized to
+	  all SPI and all F2 and F4 (let me know if this introduces any other
+	  issues).  Discovered and fixed by Sebastien Lorquet after much
+	  consternation (2014-12-8).
+	* libc/stdio/lib_avsprintf.c: avsprintf():  Fix a bug in usage of
+	  va_list on x86.  On x86, va_list is a pointer to a single copy on the
+	  stack.  avsprintf() calls lib_vsprintf() twice and so traverses the
+	  va_list twice using va_start.  va_start modifies that single copy on 
+	  he stack so that the second call to lib_vsprintf() fails.  This appears
+	  to be an issue with x86 only so far (2014-12-8).
+	* stdint.h:  Don't use hex values to specify minimum values of fixed
+	  width, signed values.  Hex values are inherently unsigned and not
+	  usable for this purpose in all contexts (2014-12-8).
+	* arch/arm/src/tiva/tiva_i2c.c, tiva_i2c.h, Kconfig, and Make.defs: Add
+	  build framework and skeleton files for Tiva I2C driver.  Initial
+	  commit is just the STM32 I2C driver with name changes and STM32-
+	  specific logic removed (2014-12-9).
+	* fs/procfs/fs_procfs.c:  Add procfs write support.  From Ken Petit
+	  (2014-12-9).
+	* include/crc8.h, libc/misc/lib_crc8.c, and Make.defs: Add CRC8 support.
+	  From Ken Pettit (2014-12-9).
+	* drivers/mtd/smart.c, Kconfig, fs/smartfs/smartfs_smart.c,
+	  smartfs_procfs.c, smartfs_utils.c, smartfs.h, Kconfig,
+	  include/nuttx/fs/ioctl.h, smart.h, and mtd/smart.h: Implements wear-
+	  leveling in the SmartFS.  From Ken Pettit (2014-12-9).
+	* arch/arm/src/tiva/tiva_i2c.c: Drive is code complete but still
+	  untested (2014-12-10).
+	* configs/tm4c123g-launchpad/src/tm4c_at24.c, tm4c_bringup.c, and other
+	  files:  Add initialization logic for an external AT24 EEPROM.  This
+	  is intended only to suppport testing of the Tiva I2C driver
+	  (2014-12-10).
+	* libnx/Makefile, libnx/nxfonts/nxfonts_x11-misc-fixed-*.h, Make.defs,
+	  Makefile.sources, nxfonts_bitmaps.c, graphics/Kconfig, and
+	  include/nuttx/nx/nxfonts.h:  Lots of fonts that derive from
+	  X11-misc-fixed-* fonts.  Converted for use by NuttX by Pierre-Noel
+	  Bouteville (2014-12-10).
+	* nuttx/drivers/mtd/m25px.c; M25P serial flash driver:  Add subsector
+	  size of the M24P16 part.  From Lazlo (2014-12-10).
+	* libc/string/lib_strncpy.c:  Commit d0c76ccacf0dc8988f9617ad82bf4349f456bb08
+	  will trash a lot of memory if n == 0.  From Yasuhiro Osaki (2014-12-11).
+	* arch/arm/src/stm32/stm32_otghsdev.c.  Fix for OTGHS device driver
+	  working in FS mode.  From Ken Pettit (2014-12-12).
+	* libc/stdio/lib_sscanf.c: Accept %X as well as %x as a format
+	  specifier.  From Sébastien Lorquet (2014-12-12).
+	* libc/stdio/lib_sscanf.c: Also accept %F as well as %f (2014-12-12).
+	* arch/arm/src/stm32/stm32_otghsdev.c: For STM32 OTG HS DEV (in FS
+	  mode): Disable ULPI clock enable in RCC AHB1 Register.  If Both ULPI
+	  and the FS clock enable bits are set in FS mode, then the ARM never
+	  awakens from WFI due to a chip issue.  This is only an issue if you
+	  are using the internal PHY.  From Ken Pettit (2014-12-13).
+	* drivers/serial/serial.c: In case a thread is doing a blockingi
+	  operation (e.g. read()) on a serial device, while it is being
+	  terminated by pthread_cancel(), then uart_close() gets called, but
+	  the semaphore (dev->recv.sem in the above example) is still blocked.
+	  This means that once the serial device is opened next time, data will
+	  arrive on the serial port (and driver interrupts handled as normal),
+	  but the received characters never arrive in the reader thread.
+	  Th problem was fixed by re-initializing the semaphores on the last
+	  uart_close() on the device. From Harald Welte (2014-12-13).
+	* sched/semaphore/sem_recover.c, Make.defs, seamphore.c,
+	  sched/wdog/wd_recover.c, Make.defs, wdog.h, sched/task/task_recover.c:
+	  Add logic to clean up after task_delete() or pthread_cancel() if the
+	  task happens to be waiting on a semaphore when it is cancelled
+	  (2014-12-13).
+	* arch/arm/src/kl/kl_gpioirq.c, Kconfig, Make.defs, and kl_irq.c: Add
+	  GPIO interrupt capability for the KL architecture. The patch is
+	  almost the same as kinetis_pinirq.c, just minor modifications and
+	  rename kl_pinirq to kl_gpioirq to make it more generic to developers.
+	  From Alan Carvalho de Assis (2014-12-13).
+	* arch/sim/src/up_ajoystick.c, Kconfig, Makefile, up_idle.c,
+	  up_internal.h, up_x11eventloop.c, up_x11framebuffer.c,
+	  configs/sim/src/Makefile, sim_boot.c, and traveler/defconfig: Add an
+	  X11 mouse-based simulation of an analog joystick device (2014-12-14).
+	* drivers/sensors/adxl345*, include/nuttx/sensors/adxl345.h and other
+	  files:  Add driver support for the ADXL345 accelerometer.  From  Alan
+	  Carvalho de Assis (2014-12-16).
+	* configs/freedom-kl25z: Add board support for the ADXL345 accelerometer.
+	  From  Alan Carvalho de Assis (2014-12-16).
+	* Kconfig, include/debug.h, drivers/sensors/*, and Qencoder logic in
+	  arch/arm/src/stm32 and various QEncoder board support files under
+	  config/: Unify sensor debug.  ADX driver was using input debug; LM75
+	  and QENCODE that their own custom debug.  Now all use
+	  CONFIG_DEBUG_SENSOR, sndbg() (2014-12-16).
+	* configs/dk-tm4c129x:  Initial board support for the Tiva DK-TM4C129x
+	  Connected Development Kit.  The initial commit is just the Tiva
+	  TM4C123G-Launchpad board support with naming changes (2014-12-16).
+	* include/nuttx/sched.h, sched/Kconfig, sched/init/os_start.c,
+	  sched/pthread/pthread_create.c, sched/task/task_prctl.c,
+	  sched/task/task_setup.c: strncpy() will not copy the terminating \0
+	  into the destination if the source is larger than the size of the
+	  destination. Ensure that the last byte is always zero and let strncpy
+	  only copy CONFIG_TASK_NAME_SIZE bytes. The issue of unterminated names
+	  can be observed in ps when creating a pthread while
+	  CONFIG_TASK_NAME_SIZE is set to 8.  From  Daniel Willmann (2014-12-17).
+	* configs/*/*/defconfig: The previous change increased the task name
+	  size allocation by one to hold a NUL terminator.  This changes reduces
+	  the configured name size by one so that no additional memory is used
+	  (2014-12-17).
+	* drivers/wireless/cc3000/cc3000.c: CC3000 Fix: Data can be unaligned.
+	  When dereferenced as an input ntosh(), a bad value is returned.
+	  Reported by Alan Carvalho de Assis (2014-12-18).
+	* configs/freedom-kl25z: Update the Freedom KL25Z board CC3000 support
+	  to use the current CC300 interfaces.  From Alan Carvalho de Assis
+	  (2014-12-18).
+	* arch/arm/src/tiva, include/tiva, and many configurations:  Change
+	  negative Tiva logic CONFIG_TIVA_DISABLE_GPIOx_IRQS to positive logic
+	  CONFIG_TIVA_GPIOx_IRQ (2014-12-18).
+	* arch/arm/src/tiva/Kconfig:  Fix configuration logic for IRQ interrupts.
+	  The various parts support varying numbers of GPIO blocks and with varying
+	  capabilities to support interrupts on the pins of different GPIO blocks
+	  (2014-12-18).
+	* arch/arm/src/stm32/chip/stm32f40xxx_rcc.h: PLLSAI register name to
+	  this one in the reference manual. From Marco Krahl (2014-12-19).
+	* arch/arm/src/stm32/chip/stm32_ltdc.h: Rename CFBLR register name to
+	  the name used in the reference manual. From Marco Krahl (2014-12-19).
+	* arch/arm/src/stm32/chip/stm32_ltdc.h: Add missing clut register
+	  definition. From Marco Krahl (2014-12-19).
+	* arch/arm/src/stm32/stm32f40xxx_rcc.c:  Configure PLLSAI clock to
+	  enable ltdc register access. From Marco Krahl (2014-12-19).
+	* configs/stm32f429i-disco/include/board.h:  Update board definition for
+	  the ili9341 LCD display. This configures all LCD settings for the RGB
+	  interface. Also adds a customer LCD display template. From Marco Krahl
+	  (2014-12-19).
+	* arch/arm/src/stm32/stm32_ltdc.h: Define a common layer description for
+	  the ltdc and dma2d controller. From Marco Krahl (2014-12-19).
+	* arch/arm/src/stm32/stm32_dma2d.c/.h and related files:  Add
+	  infrastructure for dma2d support. From Marco Krahl (2014-12-19).
+	* arch/arm/include/stm32/ltdc.h:  Add interface to perform hardware
+	  accelerated layer operation. The following methods must be supported
+	  by the implementation: gevideoinfo, getplaneinfo, getlid, setclut,
+	  getclut, setcolor, getcolor, setcolorkey, getcolorkey, setalpha,
+	  getalpha, setblendmode, getblendmode, setarea, getarea, and update.
+	  And if DMA2D is supported: blit and blend.  The method up_ltdcgetlayer
+	  provides access to a reference of a specific ltdc layer. From Marco
+	  Krahl (2014-12-19).
+	* arch/arm/src/stm32/stm32_ltdc.c: Implements ltdc frambuffer support
+	  for the generic nuttx framebuffer interface, (see nuttx/video/fb.h).
+	  This also implements the interface to perform hardware accelerated
+	  layer operation by the ltdc controller and dma2d controller later
+	  (see nuttx/video/ltdc.h). The following methods are supported by the
+	  ltdc interface: getvideoinfo, getplaneinfo, getlid, setclut, getclut,
+	  setcolor, getcolor, setcolorkey, getcolorkey, setalpha, getalpha,
+	  setblendmode, getblendmode, setarea, getarea, and update. From Marco
+	  Krahl (2014-12-19).
+	* include/nuttx/lcd/ili9341.h: Update interface control definitions.
+	  From Marco Krahl (2014-12-19).
+	* configs/stm32f429i-disco/src/stm32_lcd.c:  Add support for
+	  initializing ltdc framebuffer and the configured lcd display.  This
+	  adds support for initializing of the ltdc controller and the lcd
+	  device connected on the stm32f429i-disco. The following methods are
+	  provided for the generic fb interface: up_fbinitialize,
+	  up_fbgetvplane, and fb_uninitialize. The following methods are
+	  provided for the ltdc interface: up_ltdcgetlayer. From Marco Krahl
+	  (2014-12-19).
+	* zrch/arm/src/stm32/Kconfig: Add configuration option for ltdc.  This
+	  adds the following ltdc configuration options: dither support, cmap
+	  support, is this the right place for CONFIG_FB_CMAP?, support for
+	  extended ltdc interface. From Marco Krahl (2014-12-19).
+	*  nuttx/configs/stm32f429i-disco: Enable configuration of framebuffer
+	  support for the ltdc controller. From Marco Krahl (2014-12-19).
+	* configs/stm32f429i-disco/src/stm32_boot.c: Initialize ltdc during
+	  bootup. From Marco Krahl (2014-12-19).
+	* configs/stm32f429i-disco/ltdc: Add default platform configuration to
+	  test framebuffer support for the ltdc. . From Marco Krahl
+	  (2014-12-19).
+	* libnx/nxfonts/nxfonts_getfont.c: A patch to add previous added font
+	  into nxf_getfonthandle function.  From  Pierre-Noel Bouteville
+	  (2014-12-19).
+	* arch/arm/src/tiva, include/tiva, and many configurations:  Change
+	  negative Tiva logic CONFIG_SSIx_DISABLE to positive logic
+	  CONFIG_TIVA_SSIx.  Add support for SSI2 and SSI3 (2014-12-21).
+	* arch/arm/src/efm32/efm32_pwm.c/.h, efm32_timer.c/.h, and related
+	  build files: Add support for timer/PWM on the EFM32GG.  From
+	  Pierre-noel Bouteville (2014-12-26).
+	* drivers/serial/Kconfig, serial.c, serialirq.c, and
+	  include/nuttx/serial/serial.h:  Add watermark levels to the serial
+	  RX flow control logic.  Modify the rxflowcontrol method to accept
+	  the number of bytes in the buffer and a boolean indication of which
+	  watermark was crossed (2014-12-27).
+	* sched/semaphore/sem_waitirq.c must be built when signals are disabled.
+	  That is because not handles not only the case of semaphore wait
+	  being awakened by a signal, but also the case with sem_timedwait.c
+	  when the semaphore wait is awakened by a timeout (2014-12-28).
+	* arch/arm/src/stm32/stm32_ltdc.c: stm32: fix faulty access to non-
+	  existing layer.  This disables operation that requires double layer
+	  support, when configured for single layer only.  From Marco Krahl
+	  (2014-12-29).
+	* arch/arm/src/stm32/stm32_ltdc.c: stm32: fix wait upon vertical blank.
+	  This should never have occurred before.  From Marco Krahl (2014-12-29).
+	* configs/stm32f429i-disco/ltdc/defconfig and src/stm32_boot.c:
+	  stm32f429i-disco: change ltdc initializing during boot up. This moves
+	  initializing of the ili9341 lcd and ltdc driver to the board specific
+	  initializing routine.  From Marco Krahl (2014-12-29).
+	* arch/arm/src/stm32/stm32_ltdc.c:  Clean up documentation, some
+	  formatting improvements.  From Marco Krahl (2014-12-29).
+	* arch/arm/src/tiva/chip/tiva_ethernet.h, lm3s_ethernet.c, and
+	  tm4c_ethernet.h:  Add logic to descriminate betwen LM3S class Ethernet
+	  register definitions and TM4C129X class Ethernet register definitions.
+	  Add TM4C129X Ethernet register definitions (2014-12-30).
+	* arch/arm/src/tiva/tm4c_ethernet.c, lm3s_ethernet.c, Kconfig, and
+	  Make.defs: First cut at TM4C129X Ethernet driver.  Initial commit is
+	  basically just the STM32 Ethernet driver with modifications for a clean
+	  compilation in the Tiva environment (2014-12-31).

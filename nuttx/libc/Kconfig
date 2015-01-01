@@ -48,6 +48,49 @@ config LIBC_FLOATINGPOINT
 		By default, floating point
 		support in printf, sscanf, etc. is disabled.
 
+config LIBC_IOCTL_VARIADIC
+	bool "Enable variadic ioctl()"
+	default n
+	---help---
+		By default, NuttX implements the "old style," three-parameter,
+		ioctl() interface with this function prototype:
+
+			int ioctl(int fd, int req, unsigned long arg);
+
+		That function is implemented as part of the VFS.  If
+		LIBC_IOCTL_VARIADIC is selected, then an additional compatibility
+		layer will be provided in the C library.  The enabled, then function
+		prototype will become:
+
+			int ioctl(int fd, int req, ...);
+
+		The ioctl() is not controlled by any standard so it is really
+		arbitrary which format you used.  You may select the variadic
+		function prototype with this option.  That will slightly increase
+		code size and ioctl() processing time.  It will not support a
+		variable number of arguments and it still always expects to see a
+		third argument of type 'unsigned long'.  The only benefit of this
+		alternative function signature is that it may provide greater
+		compatibility if you are porting code from other platforms that use
+		the variadic ioctl() function.
+
+		WARNING:  Use of this option could cause subtle system errors is
+		the third argument is omitted or if the sizeof the thread argument
+		is anything other than sizeof (unsigned long).  Most small integers
+		will be promoted to 'int'.  The following assertion appears in ioctl():
+
+			DEBUGASSERT(sizeof(int)        == sizeof(unsigned long) &&
+			            sizeof(FAR void *) == sizeof(unsigned long));
+
+		Do not enable this option if the above is not true.  32-bit ARM
+		should pass this test with all three types having sizeof(type) == 4
+		bytes.  'float' should also be tested.  But 'long long' and 'double'
+		are out of the question!  Don't event try to pass them.
+
+		And what will happen if no third argument is passed?  In most cases,
+		this should just result in a garbage value for arg.  But you may
+		discover cases where something worse happens!
+
 config LIB_RAND_ORDER
 	int "Order of the random number generate"
 	default 1
@@ -191,6 +234,27 @@ config LIBC_PERROR_STDOUT
 		POSIX requires that perror() provide its output on stderr.  This option may
 		be defined, however, to provide perror() output that is serialized with
 		other stdout messages.
+
+config LIBC_TMPDIR
+	string "Temporary file directory"
+	default "/tmp"
+	depends on FS_WRITABLE
+		---help---
+		If a write-able file system is selected, this string will be
+		provided to specify the full path to a directory where temporary
+		files can be created.  This would be a good application of RAM disk:
+		To provide temporary storage for application data.
+
+config LIBC_MAX_TMPFILE
+	int "Maximum size of a temporary file path"
+	default 32
+	depends on FS_WRITABLE
+		---help---
+		If a write-able file system is selected, then temporary file may be
+		supported at the path provided by LIBC_TMPDIR.  The tmpnam() interface
+		keeps a static copy of this last filename produced; this value is the
+		maximum size of that last filename.  This size is the size of the full
+		file path.
 
 config ARCH_LOWPUTC
 	bool "Low-level console output"

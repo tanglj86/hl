@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 11, 2014)
+NuttX TODO List (Last updated December 29, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -8,7 +8,7 @@ board port.
 
 nuttx/
 
- (10)  Task/Scheduler (sched/)
+ (11)  Task/Scheduler (sched/)
   (1)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
@@ -17,9 +17,9 @@ nuttx/
   (6)  Binary loaders (binfmt/)
  (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
- (10)  Libraries (libc/, )
+ (11)  Libraries (libc/, libm/)
  (11)  File system/Generic drivers (fs/, drivers/)
-  (8)  Graphics subystem (graphics/)
+  (9)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (2)  Build system / Toolchains
@@ -172,6 +172,65 @@ o Task/Scheduler (sched/)
                apps/netutils/thttpd to kill CGI tasks that timeout.
   Status:      Open
   Priority:    Low and not easily removable.
+
+  Title:       RELEASE SEMAPHORES HELD BY CANCELED THREADS:
+  Description: Commit: fecb9040d0e54baf14b729e556a832febfe8229e: "In
+                case a thread is doing a blocking operation (e.g. read())
+                on a serial device, while it is being terminated by
+                pthread_cancel(), then uart_close() gets called, but
+                the semaphore (dev->recv.sem in the above example) is
+                still blocked.
+
+               "This means that once the serial device is opened next
+                time, data will arrive on the serial port (and driver
+                interrupts handled as normal), but the received characters
+                never arrive in the reader thread.
+
+                This patch addresses the problem by re-initializing the
+                semaphores on the last uart_close() on the device."
+
+               Yahoo! Groups message 7726: "I think that the system
+                should be required to handle pthread_cancel safely in
+                all cases.  In the NuttX model, a task is like a Unix
+                process and a pthread is like a Unix thread.  Cancelling
+                threads should always be safe (or at least as unsafe) as
+                under Unix because the model is complete for pthreads...
+
+               "So, in my opinion, this is a generic system issue, not
+                specific to the serial driver.  I could also implement
+                logic to release all semaphores held by a thread when
+                it exits -- but only if priority inheritance is enabled;
+                because only in that case does the code have any memory
+                of which threads actually hold the semaphore.
+
+               "The patch I just incorporated is also insufficient.  It
+                works only if the serial driver is shut down when the
+                thread is cancelled.  But what if there are other open
+                references to the driver?  Then the driver will not be
+                shut down, the semaphores will not be re-initialized, and
+                the semaphore counts will still be off by one.
+
+               "I think that the system needs to automatically release any
+                semaphores held by a thread being killed asynchronously?
+                It seems necessary to me."
+
+               UPDATE; The logic enabled when priority inheritance is
+               enabled for this purpose is insufficient.  It provides
+               hooks so that given a semaphore it can traverse all
+               holders.  What is needed would be logic so that given
+               a task, you can traverse all semaphores held by the task,
+               releasing each semaphore cound held by the exiting task.
+               Nothing like this exists now so that solution is not
+               imminent.
+
+               UPDATE: The basic fix to release the semaphore count if
+               a thread is killed via pthread_cancel() or task_delete()
+               has been implemented (2014-12-13).  See the new file:
+               sched/semaphore/sem_recover.c  However, the general
+               issue of freeing semaphores when a thread exists still
+               exists.
+  Status:      Open
+  Priority:    Medium-ish
 
 o Memory Managment (mm/)
   ^^^^^^^^^^^^^^^^^^^^^^
@@ -730,38 +789,6 @@ o Binary loaders (binfmt/)
 o Network (net/, drivers/net)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Title:       MULTIPLE NETWORK INTERFACE SUPPORT
-  Description: uIP polling issues / Multiple network interface support:
-
-               (1) Current logic will not support multiple Ethernet drivers.
-                  Each driver should poll on TCP connections connect on the
-                  network supported by the driver; UDP polling should respond
-                  with TX data only if the UDP packet is intended for the
-                  the network supported by the driver.
-
-               (2) If there were multiple drivers, polling would occur at
-                  double the rate.  Fix by using bound IP address in TCP
-                  connection (lipaddr) and verifying that it is in the subnet
-                  served by the driver.
-
-               Another issue:  When sending packets to another subnet, the
-               current logic falls back and uses ETH0 if it cannot find the
-               device for the subnet.  That lookup would need to be smarter...
-               perhaps it needs a routing table.
-
-  Status:      Open.  Nothing will probably be done until I have a platform
-               with two network interfaces that I need to support.
-  Priority:    Medium, The feature is not important, but it is important
-               for NuttX to resolve the architectural issues.
-
-  Title:       SENDTO() AND MULTIPLE NETWORK INTERFACE SUPPORT
-  Description: sendto() and multiple network interface support:
-               When polled, would have to assure that the destination IP
-               is on the subnet served by the polling driver.
-  Status:      Open.  This is really part of the above issue.
-  Priority:    Medium, The feature is not important, but it is important
-               for NuttX to resolve the architectural issues.
-
   Title:       IPv6
   Description: IPv6 support is incomplete.  Adam Dunkels has recently announced
                IPv6 support for uIP (currently only as part of Contiki).  Those
@@ -860,6 +887,50 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Medium.  Important on slow applications that will not accept
                connections promptly.
+
+  Title:       INTERRUPT LEVEL PROCESSING IN ETHERNET DRIVERS
+  Description: Too many Ethernet drivers do interrupt-level processing with
+               the network stack.  The network stack supports either interrupt
+               level processing or normal task level processing (depending on
+               CONFIG_NET_NOINTS).  This is really a very bad use of CPU
+               resources;  All of the network stack processing should be more
+               to a work queue (and, all use of CONFIG_NET_NOINTS=n should
+               be eliminated).  This applies to almost all Ethernet drivers:
+
+               ARCHITECTURE   CONFIG_NET_NOINTS
+               C5471          NO
+               STM32          NO
+               TIVA/LM3S      NO
+               TIVA/TM4C      YES <<
+               eZ80           NO
+               LPC17xx        YES <<
+               DMxxx NIC      NO
+               PIC32          NO
+               RGMP           NO
+               SAM3/4         NO
+               SAMA5D         NO
+               SIM            N/A << Doesn't support interrupts
+
+               The general outline of how this might be done is included in
+               drivers/net/skeleton.c
+  Status:      Open
+  Priority:    Pretty high if you want a well behaved system.
+
+  Title:       UDP MULTICAST RECEPTION
+  Description: The logic in udp_input() expects either a single receive socket or
+               none at all.  However, multiple sockets should be capable of
+               receiving a UDP datagram (multicast reception).  This could be
+               handled easily by something like:
+
+                for (conn = NULL; conn = udp_active (pbuf, conn); )
+
+               If the callback logic that receives a packet responds with an
+               outgoing packet, then it will over-write the received buffer,
+               however.  recvfrom() will not do that, however.  We would have
+               to make that the rule: Recipients of a UDP packet must treat
+               the packet as read-only.
+  Status:      Open
+  Priority:    Low, unless your logic depends on that behavior.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1072,6 +1143,41 @@ o Libraries (libc/)
   Status:      Open
   Priority:    Medium (this might important to someone).
 
+  Title:       LIBM INACCURACIES
+  Description: "..if you are writing something like robot control or
+               inertial navigation system for aircraft, I have found
+               that using the toolchain libmath is only safe option.
+               I ported some code for converting quaternions to Euler
+               angles to NuttX for my project and only got it working
+               after switching to newlib math library.
+
+               "NuttX does not fully implement IEC 60559 floating point
+               from C99 (sections marked [MX] in OpenGroup specs) so if
+               your code assumes that some function, say pow(), actually
+               behaves right for all the twenty or so odd corner cases
+               that the standards committees have recently specified,
+               you might get surprises. I'd expect pow(0.0, 1.0) to
+               return 0.0 (as zero raised to any positive power is
+               well-defined in mathematics) but I get +Inf.
+
+               "NuttX atan2(-0.0, -1.0) returns +M_PI instead of correct
+               -M_PI. If we expect [MX] functionality, then atan2(Inf, Inf)
+               should return M_PI/4, instead NuttX gives NaN.
+
+               "asin(2.0) does not set domain error or return NaN. In fact
+               it does not return at all as the loop in it does not
+               converge, hanging your app.
+
+               "There are likely many other issues like these as the Rhombs
+               OS code has not been tested or used that much. Sorry for not
+               providing patches, but we found it easier just to switch the
+               math library."
+
+               Ref: https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/7805
+Status:        Open
+Priority:      Low for casual users but clearly high if you need care about
+               these incorrect corner case behaviors in the math libraries.
+
 o File system / Generic drivers (fs/, drivers/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1263,6 +1369,25 @@ o Graphics subsystem (graphics/)
                radius equal to the width of the line.
   Status:      Open
   Priority:    Medium-ish.  This would definitely improve line drawing.
+
+  Title:       PER-WINDOW FRAMEBUFFERS
+  Description: One of the most awkard things to handle in the NX windowing
+               system is the re-draw callback.  This is difficult because it
+               requires ad hoc, custom logic to be able to do the redrawing
+               in most cases.
+
+               One solution would be to provide a per-window framebuffer.
+               All rending would be performed into the per-window framebuffer
+               and the rended bits would be copied the LCD or framebuffer
+               device memory on demand when the redraw is required.
+
+               This would (a) greatly simplify the graphics interface, (b)
+               greatly improve redraw performance, and (c) enable a more
+               generic use of the windowing.  The downside would be a large
+               usage of memory to hold all of the framebuffers, one for each
+               window.
+  Status:      Open
+  Priority:    Low, of mostly strategic value.
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^

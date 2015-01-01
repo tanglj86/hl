@@ -26,16 +26,24 @@ README
 STATUS
 ======
 
-  This README now exists only as some analysis for a port to the EFM32 Giant
-  Gecko Starter Kit.  That port has not yet been developed and I do not now
-  have hardware in hand.  So the status is partially analyzed, but not yet implemented.
+  2014-11-02:  Completed the basic NSH configuration for the EFM32 Giant Gecko
+    Starter Kit.
+  2014-11-12:  The basic NSH configuration is functional with a serial console
+    on LEUART0.
+  2014-11-14:  LEUART0 BAUD increased from 2400 to 9600.  Calibrated delay
+    loop.
+  2014-11-18:  Added basic drivers for USB device and host.  The initial port
+    is a simple leverage from the STM32 which appears to use the same IP.
+    The current state is just the STM32 USB drivers with the appropriate.
+    The USB drivers still lack EFM32 initialization logic and are, of course,
+    completely untested.
 
 LEDs and Buttons
 ================
 
   LEDs
   ----
-  The EFM32 Giant Gecko Start Kit has two yellow LEDs marke LED0 and LED1.
+  The EFM32 Giant Gecko Start Kit has two yellow LEDs marked LED0 and LED1.
   These LEDs are controlled by GPIO pins on the EFM32.  The LEDs are
   connected to pins PE2 and PE3 in an active high configuration:
 
@@ -74,18 +82,22 @@ LEDs and Buttons
     LED_PANIC            The system has crashed     OFF      Blinking
     LED_IDLE             STM32 is is sleep mode       Not used
 
+  Thus if LED0 statically on, NuttX has successfully booted and is,
+  apparently, running normally.  If LED1 is flashing at approximately
+  2Hz, then a fatal error has been detected and the system has halted.
+
   Buttons
   -------
   The EFM32 Giant Gecko Start Kit has two buttons marked PB0 and PB1. They
   are connected to the EFM32, and are debounced by RC filters with a time
   constant of 1ms. The buttons are connected to pins PB9 and PB10:
 
-  ------------------------------------- --------------------
-  EFM32 PIN                             BOARD SIGNALS
-  ------------------------------------- --------------------
-  B9/EBI_A03/U1_TX #2                   MCU_PB9  UIF_PB0
-  B10/EBI_A04/U1_RX #2                  MCU_PB10 UIF_PB1
-  ------------------------------------- --------------------
+    ------------------------------------- --------------------
+    EFM32 PIN                             BOARD SIGNALS
+    ------------------------------------- --------------------
+    B9/EBI_A03/U1_TX #2                   MCU_PB9  UIF_PB0
+    B10/EBI_A04/U1_RX #2                  MCU_PB10 UIF_PB1
+    ------------------------------------- --------------------
 
   Buttons are connected to ground so they will read low when closed.
 
@@ -94,7 +106,17 @@ Serial Console
 
    Default Serial Console
    ----------------------
-   UART0 is configured as the default serial console at 115200 8N1
+   LEUART0 is configured as the default serial console at 9600 8N1
+   on pins PD5 and PD4.
+
+     ---------- ---- ----------- -----------
+     SIGNAL     PGIO EXP Header  Test Point
+     ---------- ---- ----------- -----------
+     LEUART0_TX PD4  Pin 12      TPJ122
+     LEUART0_RX PD5  Pin 14      TPJ123
+     ---------- ---- ----------- -----------
+
+   It should also be possible to use UART0 is configured at 115200 8N1
    on pins PE0 and PE1.
 
    Communication through the Board Controller
@@ -105,6 +127,55 @@ Serial Console
    controller in the form of a UART connection. The connection is enabled by
    setting the EFM_BC_EN (PF7) line high, and using the lines EFM_BC_TX
    (PE0) and EFM_BC_RX (PE1) for communicating.
+
+USING THE J-LINK GDB SERVER
+===========================
+
+   1. Star the J-Link GDB server.  You should see the start-up configuration
+      window.  SelectL
+
+      a. Target device = EFM32GG990F1024
+      b. Select Target interface = SWD
+
+   2. Press OK.  The GDB server should start and the last message in the Log
+      output should be "Waiting for GDB connection".
+
+   3. In a terminal window, start GDB:
+
+      arm-none-eabi-gdb
+
+   4. Connect to the J-Link GDB server:
+
+     (gdb) target remote localhost:2331
+
+   5. Load and run nuttx
+
+     (gdb) mon halt
+     (gdb) load nuttx
+     (gdb) mon reset go
+
+   I had to tinker with the setup a few times repeating the same steps above
+   before things finally began to work.  Don't know why.
+
+   To debug code already burned into FLASH:
+
+   1. Start the GDB server as above.
+
+   2. In a terminal window, start GDB:
+
+      arm-none-eabi-gdb
+
+   3. Connect to the J-Link GDB serer:
+
+     (gdb) target remote local host
+
+   3. Load the nuttx symbol file, reset, and debug
+
+     (gdb) mon halt
+     (gdb) file nuttx
+     (gdb) mon reset
+     (gdb) s
+     ...
 
 Configurations
 ==============
@@ -126,9 +197,7 @@ Configurations
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART0.  Support for
-    built-in applications is enabled, but in the base configuration no
-    built-in applications are selected (see NOTES below).
+    Configuration enables the serial interfaces on LEUART0 at 9600 8N1.
 
     NOTES:
 

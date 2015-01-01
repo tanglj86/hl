@@ -436,7 +436,7 @@ static inline uint32_t efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
         frequency = BOARD_HFXO_FREQUENCY;
 
 #ifdef CMU_CTRL_HFLE
-#if BOARD_LFXO_FREQUENCY > CMU_MAX_FREQ_HFLE
+#if BOARD_HFXO_FREQUENCY > CMU_MAX_FREQ_HFLE
         /* Adjust HFXO buffer current for high crystal frequencies, enable HFLE
          * for frequencies above CMU_MAX_FREQ_HFLE.
          *
@@ -452,7 +452,7 @@ static inline uint32_t efm32_hfclk_config(uint32_t hfclksel, uint32_t hfclkdiv)
          * enabled.
          */
 
-        if ((CMU->HFCORECLKEN0 & CMU_HFCORECLKEN0_LE) != 0)
+        if ((getreg32(EFM32_CMU_HFCORECLKEN0) & CMU_HFCORECLKEN0_LE) != 0)
           {
             regval  = getreg32(EFM32_CMU_HFCORECLKDIV);
             regval |= CMU_HFCORECLKDIV_HFCORECLKLEDIV_DIV4;
@@ -875,7 +875,7 @@ static inline void efm32_itm_syslog(void)
    */
 
   regval  = getreg32(EFM32_GPIO_ROUTE);
-  regval &= _GPIO_ROUTE_SWLOCATION_MASK;
+  regval &= ~_GPIO_ROUTE_SWLOCATION_MASK;
   regval |= GPIO_ROUTE_SWOPEN;
   regval |= ((uint32_t)BOARD_SWOPORT_LOCATION << _GPIO_ROUTE_SWLOCATION_SHIFT);
   putreg32(regval, EFM32_GPIO_ROUTE);

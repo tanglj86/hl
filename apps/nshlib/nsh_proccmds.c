@@ -53,8 +53,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_NSH_PROC_MOUNTPOUNT
-#  define CONFIG_NSH_PROC_MOUNTPOUNT "/proc"
+#ifndef CONFIG_NSH_PROC_MOUNTPOINT
+#  define CONFIG_NSH_PROC_MOUNTPOINT "/proc"
 #endif
 
 #undef HAVE_CPULOAD
@@ -215,7 +215,7 @@ static int loadavg(pid_t pid, FAR char *buffer, size_t buflen)
 
   /* Form the full path to the 'loadavg' pseudo-file */
 
-  snprintf(path, sizeof(path), CONFIG_NSH_PROC_MOUNTPOUNT "/%d/loadavg",
+  snprintf(path, sizeof(path), CONFIG_NSH_PROC_MOUNTPOINT "/%d/loadavg",
            (int)pid);
 
   /* Read the 'loadavg' pseudo-file into the user buffer */
@@ -236,9 +236,7 @@ static void ps_task(FAR struct tcb_s *tcb, FAR void *arg)
   char buffer[8];
   int ret;
 #endif
-#if CONFIG_MAX_TASK_ARGS > 2
   int i;
-#endif
 
   /* Show task status */
 
@@ -293,12 +291,10 @@ static void ps_task(FAR struct tcb_s *tcb, FAR void *arg)
 
           /* Then any additional arguments */
 
-#if CONFIG_MAX_TASK_ARGS > 2
-          for (i = 2; i <= CONFIG_MAX_TASK_ARGS && ttcb->argv[i]; i++)
+          for (i = 2; ttcb->argv[i]; i++)
             {
               nsh_output(vtbl, ", %p", ttcb->argv[i]);
             }
-#endif
         }
     }
 

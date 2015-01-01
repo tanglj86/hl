@@ -77,6 +77,11 @@ ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += up_touchscreen.c
   HOSTSRCS += up_x11eventloop.c
+else
+ifeq ($(CONFIG_SIM_AJOYSTICK),y)
+  CSRCS += up_ajoystick.c
+  HOSTSRCS += up_x11eventloop.c
+endif
 endif
 endif
 endif
@@ -95,7 +100,7 @@ endif
 
 ifeq ($(CONFIG_NET),y)
 CSRCS += up_netdriver.c
-HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_BUFSIZE)
+HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_MTU)
 ifneq ($(HOSTOS),Cygwin)
 HOSTSRCS += up_tapdev.c up_netdev.c
 else

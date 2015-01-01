@@ -240,4 +240,4 @@ void efm32_setled(int led, bool ledon);
 void efm32_setleds(uint8_t ledset);
 #endif
 
-#endif /* __CONFIGS_EFM32_DK3650_INCLUDE_BOARD_H */
+#endif /* __CONFIGS_EFM32_G8XX_STK_INCLUDE_BOARD_H */

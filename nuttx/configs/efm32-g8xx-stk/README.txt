@@ -48,6 +48,8 @@ STATUS
     (probably because UART0 is used with the board controller???).  Pins
     are not available for other U[S]ARTs on the board.
 
+    DMA and USART-based SPI supported are included, but not yet tested.
+
   2014-10-29:  Calibrated the delays loops.
 
   2014-10-29:  The start-up time is long -- about a second.  I have traced
@@ -177,7 +179,7 @@ SERIAL CONSOLE
 USING THE J-LINK GDB SERVER
 ===========================
 
-   1. Star the J-Link GDB server.  You should see the start-up confiration
+   1. Star the J-Link GDB server.  You should see the start-up configuration
       window.  SelectL
 
       a. Target device = EFM32G880F128
@@ -190,9 +192,9 @@ USING THE J-LINK GDB SERVER
 
       arm-none-eabi-gdb
 
-   4. Connect to the J-Link GDB serer:
+   4. Connect to the J-Link GDB server:
 
-     (gdb) target remote local host
+     (gdb) target remote localhost:2331
 
    5. Load and run nuttx
 
