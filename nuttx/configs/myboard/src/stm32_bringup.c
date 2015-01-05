@@ -83,7 +83,7 @@ int stm32_bringup(void)
 
 #ifdef HAVE_SDIO
   /* Initialize the SDIO block driver */
-
+  
   ret = stm32_sdio_initialize();
   if (ret != OK)
     {

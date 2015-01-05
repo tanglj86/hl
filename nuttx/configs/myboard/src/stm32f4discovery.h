@@ -221,12 +221,12 @@
 #  define GPIO_OLED_DC    GPIO_OLED_A0
 #endif
 
-/* STM32F4DIS-BB MicroSD
+/* MicroSD
  *
  * ---------- ------------- ------------------------------
  * PIO        SIGNAL        Comments
  * ---------- ------------- ------------------------------
- * PB15       NCD           Pulled up externally
+ * PF6        NCD           Pulled up externally
  * PC9        DAT1          Configured by driver
  * PC8        DAT0          "        " "" "    "
  * PC12       CLK           "        " "" "    "
@@ -236,9 +236,9 @@
  * ---------- ------------- ------------------------------
  */
 
-#if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_SDIO)
+#if defined(CONFIG_STM32_SDIO)
 #  define GPIO_SDIO_NCD   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
-                           GPIO_PORTB|GPIO_PIN15)
+                           GPIO_PORTF|GPIO_PIN6)
 #endif
 
 /****************************************************************************
