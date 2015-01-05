@@ -62,6 +62,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+#  include <nuttx/net/phy.h>
+#endif
+
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
 #endif
@@ -102,17 +106,44 @@
 #  error High priority work queue support is required
 #endif
 
-#ifndef CONFIG_TIVA_PHYADDR
-#  error CONFIG_TIVA_PHYADDR must be defined in the NuttX configuration
-#endif
+/* Are we using the internal PHY or an external PHY? */
 
 #if defined(CONFIG_TIVA_PHY_INTERNAL)
+
+/* Internal PHY */
+
 #  if defined(CONFIG_TIVA_PHY_MII) ||defined(CONFIG_TIVA_PHY_RMII)
 #    warning CONFIG_TIVA_PHY_MII or CONFIG_TIVA_PHY_RMII defined with internal PHY
 #  endif
+
 #  undef CONFIG_TIVA_PHY_MII
 #  undef CONFIG_TIVA_PHY_RMII
+
+/* Properties of the internal PHY are hard-coded */
+
+#  undef CONFIG_TIVA_PHYADDR
+#  undef CONFIG_TIVA_PHYSR_ALTCONFIG
+#  undef CONFIG_TIVA_PHYSR_ALTMODE
+#  undef CONFIG_TIVA_PHYSR_10HD
+#  undef CONFIG_TIVA_PHYSR_100HD
+#  undef CONFIG_TIVA_PHYSR_10FD
+#  undef CONFIG_TIVA_PHYSR_100FD
+#  undef CONFIG_TIVA_PHYSR_SPEED
+#  undef CONFIG_TIVA_PHYSR_100MBPS
+#  undef CONFIG_TIVA_PHYSR_MODE
+#  undef CONFIG_TIVA_PHYSR_FULLDUPLEX
+
+#  define CONFIG_TIVA_PHYADDR          0
+#  define CONFIG_TIVA_PHYSR            TIVA_EPHY_STS
+#  define CONFIG_TIVA_PHYSR_SPEED      EPHY_STS_SPEED
+#  define CONFIG_TIVA_PHYSR_100MBPS    0
+#  define CONFIG_TIVA_PHYSR_MODE       EPHY_STS_DUPLEX
+#  define CONFIG_TIVA_PHYSR_FULLDUPLEX EPHY_STS_DUPLEX
+
 #else
+
+/* External PHY. Properties must be provided in the configuration */
+
 #  if !defined(CONFIG_TIVA_PHY_MII) && !defined(CONFIG_TIVA_PHY_RMII)
 #    warning None of CONFIG_TIVA_PHY_INTERNAL, CONFIG_TIVA_PHY_MII, or CONFIG_TIVA_PHY_RMII defined
 #  endif
@@ -120,6 +151,10 @@
 #  if defined(CONFIG_TIVA_PHY_MII) && defined(CONFIG_TIVA_PHY_RMII)
 #    error Both CONFIG_TIVA_PHY_MII and CONFIG_TIVA_PHY_RMII defined
 #  endif
+#endif
+
+#ifndef CONFIG_TIVA_PHYADDR
+#  error CONFIG_TIVA_PHYADDR must be defined in the NuttX configuration
 #endif
 
 #ifdef CONFIG_TIVA_AUTONEG
@@ -217,15 +252,15 @@
 #endif
 
 /* Clocking *****************************************************************/
-/* Set MIIADDR CR bits depending on SysClk freuency */
+/* Set MIIADDR CR bits depending on SysClk frequency */
 
 #if SYSCLK_FREQUENCY >= 20000000 && SYSCLK_FREQUENCY < 35000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_20_35
-#elif SYSCLK_FREQUENCY >= 35000000 && SYSCLK_FREQUENCY < 60000000
+#elif SYSCLK_FREQUENCY >= 35000000 && SYSCLK_FREQUENCY <= 64000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_35_60
-#elif SYSCLK_FREQUENCY >= 60000000 && SYSCLK_FREQUENCY < 100000000
+#elif SYSCLK_FREQUENCY >= 60000000 && SYSCLK_FREQUENCY <= 104000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_60_100
-#elif SYSCLK_FREQUENCY >= 100000000 && SYSCLK_FREQUENCY < 150000000
+#elif SYSCLK_FREQUENCY >= 100000000 && SYSCLK_FREQUENCY <= 150000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_100_150
 #elif SYSCLK_FREQUENCY >= 150000000 && SYSCLK_FREQUENCY <= 168000000
 #  define EMAC_MIIADDR_CR EMAC_MIIADDR_CR_150_168
@@ -478,38 +513,68 @@
   (EMAC_DMABUSMOD_SWR | EMAC_DMABUSMOD_DA | EMAC_DMABUSMOD_DSL_MASK | \
    EMAC_DMABUSMOD_ATDS | EMAC_DMABUSMOD_PBL_MASK | EMAC_DMABUSMOD_PR_MASK | \
    EMAC_DMABUSMOD_FB | EMAC_DMABUSMOD_RPBL_MASK | EMAC_DMABUSMOD_USP | \
-   EMAC_DMABUSMOD_8XPBL | EMAC_DMABUSMOD_AAL | EMAC_DMABUSMOD_MB)
+   EMAC_DMABUSMOD_8XPBL | EMAC_DMABUSMOD_AAL | EMAC_DMABUSMOD_MB |\
+   EMAC_DMABUSMOD_TXPR | EMAC_DMABUSMOD_RIB)
 
 /* The following bits are set or left zero unconditionally in all modes.
  *
- *
  * EMAC_DMABUSMOD_SWR    Software reset                     0 (no reset)
- * EMAC_DMABUSMOD_DA     DMA Arbitration                    0 (round robin)
+ * EMAC_DMABUSMOD_DA     DMA Arbitration                    1 (fixed priority)
  * EMAC_DMABUSMOD_DSL    Descriptor skip length             0
  * EMAC_DMABUSMOD_ATDS   Enhanced descriptor format enable  Depends on CONFIG_TIVA_EMAC_ENHANCEDDESC
- * EMAC_DMABUSMOD_PBL    Programmable burst length          32 beats
- * EMAC_DMABUSMOD_PR     RX TX priority ratio               2:1
- * EMAC_DMABUSMOD_FB     Fixed burst                        1 (enabled)
- * EMAC_DMABUSMOD_RPBL   RX DMA programmable burst length  32 beats
- * EMAC_DMABUSMOD_USP    Use separate PBL                   1 (enabled)
- * EMAC_DMABUSMOD_8XPBL  8x programmable burst length mode  0 (disabled)
- * EMAC_DMABUSMOD_AAL    Address-aligned beats              1 (enabled)
- * EMAC_DMABUSMOD_MB     Mixed burst                        0 (disabled, F2/F4 only)
+ * EMAC_DMABUSMOD_PBL    Programmable burst length          Depends on EMAC_DMA_RXBURST
+ * EMAC_DMABUSMOD_PR     RX TX priority ratio               0 1:1
+ * EMAC_DMABUSMOD_FB     Fixed burst                        0 (disabled)
+ * EMAC_DMABUSMOD_RPBL   RX DMA programmable burst length   Depends on EMAC_DMA_TXBURST
+ * EMAC_DMABUSMOD_USP    Use separate PBL                   Depends on EMAC_DMA_RX/TXBURST
+ * EMAC_DMABUSMOD_8XPBL  8x programmable burst length mode  Depends on EMAC_DMA_RX/TXBURST
+ * EMAC_DMABUSMOD_AAL    Address-aligned beats              0 (disabled)
+ * EMAC_DMABUSMOD_MB     Mixed burst                        1 (enabled)
  * EMAC_DMABUSMOD_TXPR   Transmit Priority                  0 (RX DMA has priority over TX)
  * EMAC_DMABUSMOD_RIB    Rebuild Burst                      0
  */
 
-#ifdef CONFIG_TIVA_EMAC_ENHANCEDDESC
-#  define DMABUSMOD_SET_MASK \
-     (EMAC_DMABUSMOD_DSL(0) | EMAC_DMABUSMOD_PBL(32) | EMAC_DMABUSMOD_ATDS | \
-      EMAC_DMABUSMOD_PR_2TO1 | EMAC_DMABUSMOD_FB | EMAC_DMABUSMOD_RPBL(32) | \
-      EMAC_DMABUSMOD_USP | EMAC_DMABUSMOD_AAL)
+#define EMAC_DMA_RXBURST          4
+#define EMAC_DMA_TXBURST          4
+
+#if EMAC_DMA_RXBURST > 32 || EMAC_DMA_TXBURST > 32
+#  define __EMAC_DMABUSMOD_8XPBL  0
+#  define __EMAC_DMA_RXBURST      EMAC_DMA_RXBURST
+#  define __EMAC_DMA_TXBURST      EMAC_DMA_TXBURST
 #else
-#  define DMABUSMOD_SET_MASK \
-     (EMAC_DMABUSMOD_DSL(0) | EMAC_DMABUSMOD_PBL(32) | EMAC_DMABUSMOD_PR_2TO1 | \
-      EMAC_DMABUSMOD_FB | EMAC_DMABUSMOD_RPBL(32) | EMAC_DMABUSMOD_USP | \
-      EMAC_DMABUSMOD_AAL)
+  /* Divide both burst lengths by 8 and set the 8X burst length multiplier */
+
+#  define __EMAC_DMABUSMOD_8XPBL  EMAC_DMABUSMOD_8XPBL
+#  define __EMAC_DMA_RXBURST      (EMAC_DMA_RXBURST >> 3)
+#  define __EMAC_DMA_TXBURST      (EMAC_DMA_TXBURST >> 3)
 #endif
+
+#define __EMAC_DMABUSMOD_PBL      EMAC_DMABUSMOD_PBL(__EMAC_DMA_RXBURST)
+
+/* Are the receive and transmit burst lengths the same? */
+
+#if __EMAC_DMA_RXBURST == __EMAC_DMA_TXBURST
+  /* Yes.. Set up to use a single burst length */
+
+#  define __EMAC_DMABUSMOD_USP    0
+#  define __EMAC_DMABUSMOD_RPBL   0
+#else
+  /* No.. Use separate burst lengths for each */
+
+#  define __EMAC_DMABUSMOD_USP    EMAC_DMABUSMOD_USP
+#  define __EMAC_DMABUSMOD_RPBL   EMAC_DMABUSMOD_RPBL(__EMAC_DMA_TXBURST)
+#endif
+
+#ifdef CONFIG_TIVA_EMAC_ENHANCEDDESC
+#  define __EMAC_DMABUSMOD_ATDS  EMAC_DMABUSMOD_ATDS
+#else
+#  define __EMAC_DMABUSMOD_ATDS  0
+#endif
+
+#define DMABUSMOD_SET_MASK \
+   (EMAC_DMABUSMOD_DA | EMAC_DMABUSMOD_DSL(0) | __EMAC_DMABUSMOD_ATDS | \
+    __EMAC_DMABUSMOD_PBL | __EMAC_DMABUSMOD_RPBL | __EMAC_DMABUSMOD_USP | \
+    __EMAC_DMABUSMOD_8XPBL | EMAC_DMABUSMOD_MB)
 
 /* Interrupt bit sets *******************************************************/
 /* All interrupts in the normal and abnormal interrupt summary.  Early transmit
@@ -521,7 +586,7 @@
   (EMAC_DMAINT_TI | EMAC_DMAINT_TBUI |EMAC_DMAINT_RI | EMAC_DMAINT_ERI)
 
 #define EMAC_DMAINT_ABNORMAL \
-  (EMAC_DMAINT_TPSI | EMAC_DMAINT_TJTI | EMAC_DMAINT_ROI | EMAC_DMAINT_TUI | \
+  (EMAC_DMAINT_TPSI | EMAC_DMAINT_TJTI | EMAC_DMAINT_OVFI | EMAC_EMAINT_UNFI | \
    EMAC_DMAINT_RBUI | EMAC_DMAINT_RPSI | EMAC_DMAINT_RWTI | /* EMAC_DMAINT_ETI | */ \
    EMAC_DMAINT_FBEI)
 
@@ -562,10 +627,13 @@ struct tiva_ethmac_s
 #ifdef CONFIG_NET_NOINTS
   struct work_s        work;        /* For deferring work to the work queue */
 #endif
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+  xcpt_t               handler;     /* Attached PHY interrupt handler */
+#endif
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct net_driver_s  dev;         /* Interface understood by network subsysem */
+  struct net_driver_s  dev;         /* Interface understood by network subsystem */
 
   /* Used to track transmit and receive descriptors */
 
@@ -674,8 +742,8 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv);
 
 /* PHY Initialization */
 
-#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-static int  tiva_phyintenable(FAR struct tiva_ethmac_s *priv);
+#if CONFIG_TIVA_PHY_INTERRUPTS
+static void tiva_phyintenable(bool enable);
 #endif
 static int  tiva_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
 static int  tiva_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
@@ -683,14 +751,14 @@ static int  tiva_phyinit(FAR struct tiva_ethmac_s *priv);
 
 /* MAC/DMA Initialization */
 
-static inline void tiva_phy_reconfigure(FAR struct tiva_ethmac_s *priv);
-static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv);
+static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv);
+static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv);
 
 static void tiva_ethreset(FAR struct tiva_ethmac_s *priv);
 static int  tiva_macconfig(FAR struct tiva_ethmac_s *priv);
 static void tiva_macaddress(FAR struct tiva_ethmac_s *priv);
 static int  tiva_macenable(FAR struct tiva_ethmac_s *priv);
-static int  tiva_ethconfig(FAR struct tiva_ethmac_s *priv);
+static int  tive_emac_configure(FAR struct tiva_ethmac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -734,6 +802,7 @@ static uint32_t tiva_getreg(uint32_t addr)
              {
                lldbg("...\n");
              }
+
           return val;
         }
     }
@@ -974,8 +1043,8 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
   txdesc  = priv->txhead;
   txfirst = txdesc;
 
-  nllvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
-          priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
+  nvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
+        priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
 
   DEBUGASSERT(txdesc && (txdesc->tdes0 & EMAC_TDES0_OWN) == 0);
 
@@ -991,7 +1060,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
       bufcount = (priv->dev.d_len + (OPTIMAL_EMAC_BUFSIZE-1)) / OPTIMAL_EMAC_BUFSIZE;
       lastsize = priv->dev.d_len - (bufcount - 1) * OPTIMAL_EMAC_BUFSIZE;
 
-      nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
+      nvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
       /* Set the first segment bit in the first TX descriptor */
 
@@ -1101,8 +1170,8 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
 
   priv->inflight++;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  nvdbg("txhead: %p txtail: %p inflight: %d\n",
+        priv->txhead, priv->txtail, priv->inflight);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
    * too.  This is because receive events can trigger more un-stoppable transmit
@@ -1374,7 +1443,7 @@ static void tiva_freesegment(FAR struct tiva_ethmac_s *priv,
   struct emac_rxdesc_s *rxdesc;
   int i;
 
-  nllvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
+  nvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
 
   /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
@@ -1432,8 +1501,8 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
   uint8_t *buffer;
   int i;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  nvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+        priv->rxhead, priv->rxcurr, priv->segments);
 
   /* Check if there are free buffers.  We cannot receive new frames in this
    * design unless there is at least one free buffer.
@@ -1498,8 +1567,8 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
               rxcurr = priv->rxcurr;
             }
 
-          nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-              priv->rxhead, priv->rxcurr, priv->segments);
+          nvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+                priv->rxhead, priv->rxcurr, priv->segments);
 
           /* Check if any errors are reported in the frame */
 
@@ -1537,8 +1606,8 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
               priv->rxhead   = (struct emac_rxdesc_s*)rxdesc->rdes3;
               tiva_freesegment(priv, rxcurr, priv->segments);
 
-              nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
-                      priv->rxhead, dev->d_buf, dev->d_len);
+              nvdbg("rxhead: %p d_buf: %p d_len: %d\n",
+                    priv->rxhead, dev->d_buf, dev->d_len);
 
               return OK;
             }
@@ -1564,8 +1633,8 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
 
   priv->rxhead = rxdesc;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  nvdbg("rxhead: %p rxcurr: %p segments: %d\n",
+        priv->rxhead, priv->rxcurr, priv->segments);
 
   return -EAGAIN;
 }
@@ -1620,7 +1689,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
       else if (BUF->type == HTONS(ETHTYPE_IP))
 #endif
         {
-          nllvdbg("IP frame\n");
+          nvdbg("IP frame\n");
 
           /* Handle ARP on input then give the IP packet to uIP */
 
@@ -1639,7 +1708,7 @@ static void tiva_receive(FAR struct tiva_ethmac_s *priv)
         }
       else if (BUF->type == htons(ETHTYPE_ARP))
         {
-          nllvdbg("ARP frame\n");
+          nvdbg("ARP frame\n");
 
           /* Handle ARP packet */
 
@@ -1697,8 +1766,8 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
   struct emac_txdesc_s *txdesc;
   int i;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  nvdbg("txhead: %p txtail: %p inflight: %d\n",
+        priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
 
@@ -1713,8 +1782,8 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
            * TX descriptors.
            */
 
-          nllvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
-                  txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
+          nvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
+                txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
 
           DEBUGASSERT(txdesc->tdes2 != 0);
 
@@ -1766,8 +1835,8 @@ static void tiva_freeframe(FAR struct tiva_ethmac_s *priv)
 
       priv->txtail = txdesc;
 
-      nllvdbg("txhead: %p txtail: %p inflight: %d\n",
-              priv->txhead, priv->txtail, priv->inflight);
+      nvdbg("txhead: %p txtail: %p inflight: %d\n",
+            priv->txhead, priv->txtail, priv->inflight);
     }
 }
 
@@ -1973,28 +2042,49 @@ static int tiva_interrupt(int irq, FAR void *context)
   /* Check if a packet transmission just completed. */
 
   dmaris = tiva_getreg(TIVA_EMAC_DMARIS);
-  if ((dmaris & EMAC_DMAINT_TI) != 0)
+  if (dmaris != 0)
     {
-      /* If a TX transfer just completed, then cancel the TX timeout so
-       * there will be do race condition between any subsequent timeout
-       * expiration and the deferred interrupt processing.
-       */
+      if ((dmaris & EMAC_DMAINT_TI) != 0)
+        {
+          /* If a TX transfer just completed, then cancel the TX timeout so
+           * there will be do race condition between any subsequent timeout
+           * expiration and the deferred interrupt processing.
+           */
 
-       wd_cancel(priv->txtimeout);
+           wd_cancel(priv->txtimeout);
+        }
+
+      /* Cancel any pending poll work */
+
+      work_cancel(HPWORK, &priv->work);
+
+      /* Schedule to perform the interrupt processing on the worker thread. */
+
+      work_queue(HPWORK, &priv->work, tiva_interrupt_work, priv, 0);
     }
-
-  /* Cancel any pending poll work */
-
-  work_cancel(HPWORK, &priv->work);
-
-  /* Schedule to perform the interrupt processing on the worker thread. */
-
-  work_queue(HPWORK, &priv->work, tiva_interrupt_work, priv, 0);
 
 #else
   /* Process the interrupt now */
 
   tiva_interrupt_process(priv);
+#endif
+
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+  /* Check for pending PHY interrupts */
+
+  if ((tiva_getreg(TIVA_EPHY_MISC) & EMAC_PHYMISC_INT) != 0)
+    {
+      /* Clear the pending PHY interrupt */
+
+      tiva_putreg(EMAC_PHYMISC_INT, TIVA_EPHY_MISC);
+
+      /* Dispatch to the registered handler */
+
+      if (priv->handler)
+        {
+          (void)priv->handler(irq, context);
+        }
+    }
 #endif
 
   return OK;
@@ -2286,7 +2376,7 @@ static int tiva_ifup(struct net_driver_s *dev)
 
   /* Configure the Ethernet interface for DMA operation. */
 
-  ret = tiva_ethconfig(priv);
+  ret = tive_emac_configure(priv);
   if (ret < 0)
     {
       return ret;
@@ -2326,7 +2416,7 @@ static int tiva_ifdown(struct net_driver_s *dev)
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Taking the network down\n");
+  nvdbg("Taking the network down\n");
 
   /* Disable the Ethernet interrupt */
 
@@ -2376,7 +2466,7 @@ static int tiva_txavail(struct net_driver_s *dev)
   FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
   irqstate_t flags;
 
-  nllvdbg("ifup: %d\n", priv->ifup);
+  nvdbg("ifup: %d\n", priv->ifup);
 
   /* Disable interrupts because this function may be called from interrupt
    * level processing.
@@ -2467,8 +2557,8 @@ static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  nvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Add the MAC address to the hardware multicast hash table */
 
@@ -2524,8 +2614,8 @@ static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
   uint32_t temp;
   uint32_t registeraddress;
 
-  nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  nvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
   /* Remove the MAC address to the hardware multicast hash table */
 
@@ -2754,14 +2844,11 @@ static void tiva_rxdescinit(FAR struct tiva_ethmac_s *priv)
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
 {
-#ifdef CONFIG_ARCH_PHY_INTERRUPT
-  FAR struct tiva_ethmac_s *priv = (FAR struct tiva_ethmac_s *)dev->d_private;
-#endif
   int ret;
 
   switch (cmd)
   {
-#ifdef CONFIG_ARCH_PHY_INTERRUPT
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
@@ -2771,7 +2858,7 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
         {
           /* Enable PHY link up/down interrupts */
 
-          ret = tiva_phyintenable(priv);
+          tiva_phyintenable(true);
         }
     }
     break;
@@ -2827,11 +2914,65 @@ static int tiva_ioctl(struct net_driver_s *dev, int cmd, long arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-static int tiva_phyintenable(struct tiva_ethmac_s *priv)
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+static void tiva_phyintenable(bool enable)
 {
+#ifdef CONFIG_TIVA_PHY_INTERNAL
+  uint16_t phyval;
+  int ret;
+
+  /* Disable further PHY interrupts until we complete this setup */
+
+  ret = tiva_putreg(0, TIVA_EPHY_IM);
+  if (ret == OK)
+    {
+      /* Enable/disable event based PHY interrupts */
+
+      if (enable)
+        {
+          /* Configure interrupts on link status change events */
+
+          ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_MISR1,
+                              EPHY_MISR1_LINKSTATEN);
+          if (ret == OK)
+            {
+              /* Enable PHY event based interrupts */
+
+              ret = tiva_phyread(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, &phyval);
+              if (ret == OK)
+                {
+                  phyval |= EPHY_SCR_INTEN;
+                  ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, phyval);
+                  if (ret == OK)
+                    {
+                      /* Enable PHY interrupts */
+
+                      tiva_putreg(EMAC_PHYIM_INT, TIVA_EPHY_IM);
+                    }
+                }
+            }
+        }
+      else
+        {
+          /* Disable PHY event based interrupts */
+
+          ret = tiva_phyread(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, &phyval);
+          if (ret == OK)
+            {
+              phyval |= EPHY_SCR_INTEN;
+              (void)tiva_phywrite(CONFIG_TIVA_PHYADDR, TIVA_EPHY_SCR, phyval);
+            }
+        }
+    }
+
+#else
+  /* Interrupt configuration logic for external PHYs depends on the
+   * particular PHY part connected.
+   */
+
 #warning Missing logic
   return -ENOSYS;
+#endif
 }
 #endif
 
@@ -2979,7 +3120,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
   priv->mbps100 = 0;
   priv->fduplex = 0;
 
-  /* Setup up PHY clocking by setting the SR field in the MIIADDR register */
+  /* Setup up PHY clocking by setting the CR field in the MIIADDR register */
 
   regval  = tiva_getreg(TIVA_EMAC_MIIADDR);
   regval &= ~EMAC_MIIADDR_CR_MASK;
@@ -2994,6 +3135,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
       ndbg("Failed to reset the PHY: %d\n", ret);
       return ret;
     }
+
   up_mdelay(PHY_RESET_DELAY);
 
   /* Perform auto-negotiation if so configured */
@@ -3021,7 +3163,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
       return -ETIMEDOUT;
     }
 
-  /* Enable auto-gegotiation */
+  /* Enable auto-negotiation */
 
   ret = tiva_phywrite(CONFIG_TIVA_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
@@ -3150,10 +3292,11 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: tiva_phy_reconfigure
+ * Function: tiva_phy_configure
  *
  * Description:
- *  Configure to support the internal PHY
+ *  Configure to support the selected PHY.  Called after each reset since
+ *  many properties of the PHY configuration are lost at each reset.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -3165,36 +3308,115 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TIVA_PHY_INTERNAL
-static inline void tiva_phy_reconfigure(FAR struct tiva_ethmac_s *priv)
-{
-  /* No special actions need to taken after a reset if the internal PHY
-   * is used.
-   */
-}
-#endif
-
-/****************************************************************************
- * Function: tiva_phy_gpioconfig
- *
- * Description:
- *  Configure to support the internal PHY
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_TIVA_PHY_INTERNAL
-static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
+static void tiva_phy_configure(FAR struct tiva_ethmac_s *priv)
 {
   uint32_t regval;
 
+  /* Set up the PHY configuration */
+
+#if defined(CONFIG_TIVA_PHY_RMII)
+  regval = EMAC_PC_PINTFS_RMII | EMAC_PC_PHYEXT;
+#elif defined(CONFIG_TIVA_PHY_MII)
+  regval = EMAC_PC_PINTFS_MII | EMAC_PC_PHYEXT;
+#else /* defined(CONFIG_TIVA_PHY_INTERNAL) */
+  regval = EMAC_PC_MDIXEN | EMAC_PC_ANMODE_100FD | EMAC_PC_ANEN |
+           EMAC_PC_PINTFS_MII;
+#endif
+  tiva_putreg(regval, TIVA_EMAC_PC);
+
+#ifdef CONFIG_TIVA_PHY_INTERNAL
+  /* If we are using the internal PHY, reset it to ensure that new
+   * configuration is latched.
+   */
+
+  regval  = tiva_getreg(TIVA_SYSCON_SREPHY);
+  regval |= SYSCON_SREPHY_R0;
+  tiva_putreg(regval, TIVA_SYSCON_SREPHY);
+
+  regval &= ~SYSCON_SREPHY_R0;
+  tiva_putreg(regval, TIVA_SYSCON_SREPHY);
+
+  /* Wait for the reset to complete */
+
+  while (!tiva_ephy_periphrdy());
+  up_udelay(250);
+#endif
+
+  /* Disable all MMC interrupts as these are enabled by default at reset */
+
+  tiva_putreg(0xffffffff, TIVA_EMAC_MMCRXIM);
+  tiva_putreg(0xffffffff, TIVA_EMAC_MMCTXIM);
+
+  /* If using an external RMII PHY, we must enable the external clock */
+
+  regval = tiva_getreg(TIVA_EMAC_CC);
+
+#if defined(CONFIG_TIVA_PHY_RMII)
+  /* Enable the external clock source input to the RMII interface signal
+   * EN0RREF_CLK by setting both the CLKEN bit in the Ethernet Clock
+   * Configuration (EMACCC) register. The external clock source must be
+   * 50 MHz with a frequency tolerance of 50 PPM.
+   */
+
+  regval = tiva_getreg(TIVA_EMAC_CC);
+#else
+  /* Disable the external clock */
+
+  regval &= ~EMAC_CC_CLKEN;
+#endif
+
+  tiva_putreg(regval, TIVA_EMAC_CC);
+}
+
+/****************************************************************************
+ * Function: tiva_phy_initialize
+ *
+ * Description:
+ *  Perform one-time PHY initialization
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline void tiva_phy_initialize(FAR struct tiva_ethmac_s *priv)
+{
+  /* Enable the clock to the PHY module */
+
+  nllvdbg("Enable EPHY clocking\n");
+  tiva_ephy_enableclk();
+
+  /* What until the PREPHY register indicates that the PHY is ready before
+   * continuing.
+   */
+
+  while (!tiva_ephy_periphrdy());
+  up_udelay(250);
+
+  /* Enable power to the Ethernet PHY */
+
+  nllvdbg("Enable EPHY power\n");
+  tiva_ephy_enablepwr();
+
+  /* What until the PREPHY register indicates that the PHY registers are ready
+   * to be accessed.
+   */
+
+  while (!tiva_ephy_periphrdy());
+  up_udelay(250);
+
+  nllvdbg("RCGCEPHY: %08x PCEPHY: %08x PREPHY: %08x\n",
+          getreg32(TIVA_SYSCON_RCGCEPHY),
+          getreg32(TIVA_SYSCON_PCEPHY),
+          getreg32(TIVA_SYSCON_PREPHY));
+  nllvdbg("Configure PHY GPIOs\n");
+
+#ifdef CONFIG_TIVA_PHY_INTERNAL
   /* Integrated PHY:
    *
    *   "The Ethernet Controller Module and Integrated PHY receive two clock inputs:
@@ -3212,42 +3434,6 @@ static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
    *   External PHY support is not yet implemented.
    */
 
-  /* Enable the Ethernet PHY in its default configuration */
-
-  /* Hold the Ethernet PHY from transmitting energy on the line during
-   * configuration by setting the PHYHOLD bit in the EMACPC register.
-   */
-
-  regval  = tiva_getreg(TIVA_EMAC_PC);
-  regval |= EMAC_PC_PHYHOLD;
-  tiva_putreg(regval, TIVA_EMAC_PC);
-
-  /* Enable the clock to the PHY module */
-
-  tiva_ephy_enableclk();
-
-  /* What until the PREPHY register indicates that the PHY is ready before
-   * continuing.
-   */
-
-  while (!tiva_ephy_periphrdy())
-    {
-    }
-
-  /* Enable power to the Ethernet PHY */
-
-  tiva_ephy_enablepwr();
-
-  /* What until the PREPHY register indicates that the PHY registers are ready
-   * to be accessed.
-   */
-
-  while (!tiva_ephy_periphrdy())
-    {
-    }
-
-  /* The EMAC interface defaults to MII mode. */
-
   /* PHY interface pins:
    *
    * EN0TXOP - Fixed pin assignment
@@ -3263,136 +3449,20 @@ static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
   tiva_configgpio(GPIO_EN0_LED0);
   tiva_configgpio(GPIO_EN0_LED1);
   tiva_configgpio(GPIO_EN0_LED2);
-}
-#endif
 
-/****************************************************************************
- * Function: tiva_phy_reconfigure
- *
- * Description:
- *  Configure to support an external PHY
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *
- ****************************************************************************/
+#else /* if defined(CONFIG_TIVA_PHY_MII) || defined(CONFIG_TIVA_PHY_RMII) */
+  /* External PHY interrupt pin */
 
-#ifndef CONFIG_TIVA_PHY_INTERNAL
-static inline void tiva_phy_reconfigure(FAR struct tiva_ethmac_s *priv)
-{
-  /* Enable the Ethernet PHY in a custom configuration */
+  tiva_configgpio(GPIO_EN0_INTRN);
 
-  /* 1. Hold the Ethernet PHY from transmitting energy on the line during
-   *    configuration by setting the PHYHOLD bit in the EMACPC register.
-   */
-
-  regval  = tiva_getreg(TIVA_EMAC_PC);
-  regval |= EMAC_PC_PHYHOLD;
-  tiva_putreg(regval, TIVA_EMAC_PC)
-
-  /* Enable the clock to the PHY module */
-
-  tiva_ephy_enableclk();
-
-  /* What until the PREPHY register indicates that the PHY is ready before
-   * continuing.
-   */
-
-  while (!tiva_ephy_periphrdy())
-    {
-    }
-
-  /* Enable power to the Ethernet PHY */
-
-  tiva_ephy_enablepwr();
-
-  /* What until the PREPHY register indicates that the PHY registers are ready
-   * to be accessed.
-   */
-
-  while (!tiva_ephy_periphrdy())
-    {
-    }
-
-  /* Set up the custom PHY configuration.
-   *
-   * NOTE: This custom PHY configuration will be lost after a reset.
-   */
-
-#if defined(CONFIG_TIVA_PHY_MII)
-  /* Set up the external MII interface configuration */
-#warning Missing logic
-
-#elif defined(CONFIG_TIVA_PHY_RMII)
-  /* Set up the external RMII interface configuration */
-#warning Missing logic
-
-  /* Enable the external clock source input to the RMII interface signal
-   * EN0RREF_CLK by setting both the ECEXT and CLKEN bit in the in the Ethernet
-   * Clock Configuration (EMACCC) register. The external clock source must be
-   * 50 MHz with a frequency tolerance of 50 PPM.
-   */
-#warning Missing logic
-
-  /* Select the RMII interface by programming the PINTFS bit field to 0x4 in
-   * the Ethernet Peripheral Configuration (EMACPC) register.
-   */
-#warning Missing logic
-
-  /* Reset the Ethernet MAC to latch the new RMII configuration by setting the
-   * SWR bit in the EMACDMABUSMOD register. This bit resets the Ethernet MAC
-   * registers in addition to configuring the RMII interface.
-   */
-#warning Missing logic
-
-  /* Software must poll the SWR bit to determine when the new configuration has
-   * been registered.
-   *
-   * Note: After this configuration is active, if the Ethernet MAC is reset by
-   * setting the R0 bit in the Ethernet MAC Software Reset (SREMAC) register in
-   * the System Control Module, then the interface is set back to its default
-   * MII configuration. In this case, the steps listed above must be repeated to
-   * return to an RMII interface.
-   */
-#warning Missing logic
-#endif
-}
-#endif
-
-/****************************************************************************
- * Function: tiva_phy_gpioconfig
- *
- * Description:
- *  Configure to support an external PHY
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifndef CONFIG_TIVA_PHY_INTERNAL
-static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
-{
-#if defined(CONFIG_TIVA_PHY_MII) || defined(CONFIG_TIVA_PHY_RMII)
-  /* Configure GPIO pins to support Ethernet */
+  /* Configure GPIO pins to support MII or RMII */
   /* MDC and MDIO are common to both modes */
 
   tiva_configgpio(GPIO_EN0_MDC);
   tiva_configgpio(GPIO_EN0_MDIO);
 
-  /* Set up the MII interface */
-
 #if defined(CONFIG_TIVA_PHY_MII)
+  /* Set up the MII interface */
 
   /* "Four clock inputs are driven into the Ethernet MAC when the MII
    *  configuration is enabled. The clocks are described as follows:
@@ -3439,9 +3509,8 @@ static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
   tiva_configgpio(GPIO_EN0_MII_TX_CLK);
   tiva_configgpio(GPIO_EN0_MII_TX_EN);
 
-  /* Set up the RMII interface. */
-
 #elif defined(CONFIG_TIVA_PHY_RMII)
+  /* Set up the RMII interface. */
 
   /* "There are three clock sources that interface to the Ethernet MAC in
    *  an RMII configuration:
@@ -3465,35 +3534,6 @@ static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
    *    for receive and transmit data."
    */
 
-  /* Enable the external clock source input to the RMII interface signal
-   * EN0RREF_CLK by setting both the ECEXT and CLKEN bit in the in the Ethernet
-   * Clock Configuration (EMACCC) register. The external clock source must be
-   * 50 MHz with a frequency tolerance of 50 PPM.
-   */
-#warning Missing logic
-
-  /* Select the RMII interface by programming the PINTFS bit field to 0x4 in
-   * the Ethernet Peripheral Configuration (EMACPC) register.
-   */
-#warning Missing logic
-
-  /* Reset the Ethernet MAC to latch the new RMII configuration by setting the
-   * SWR bit in the EMACDMABUSMOD register. This bit resets the Ethernet MAC
-   * registers in addition to configuring the RMII interface.
-   */
-#warning Missing logic
-
-  /* Software must poll the SWR bit to determine when the new configuration has
-   * been registered.
-   *
-   * Note: After this configuration is active, if the Ethernet MAC is reset by
-   * setting the R0 bit in the Ethernet MAC Software Reset (SREMAC) register in
-   * the System Control Module, then the interface is set back to its default
-   * MII configuration. In this case, the steps listed above must be repeated to
-   * return to an RMII interface.
-   */
-#warning Missing logic
-
   /* RMII interface pins (7):
    *
    * RMII_TXD[1:0], RMII_TX_EN, RMII_RXD[1:0], RMII_CRS_DV, MDC, MDIO,
@@ -3514,9 +3554,8 @@ static inline void tiva_phy_gpioconfig(FAR struct tiva_ethmac_s *priv)
   /* Enable pulse-per-second (PPS) output signal */
 
   tiva_configgpio(GPIO_EN0_PPS);
-#endif
+#endif 
 }
-#endif
 
 /****************************************************************************
  * Function: tiva_ethreset
@@ -3538,6 +3577,7 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
 {
   uint32_t regval;
 
+#if 0 /* REVISIT: This causes the DMABUSMOD reset to hang. */
   /* Reset the Ethernet MAC */
 
   regval  = tiva_getreg(TIVA_SYSCON_SREMAC);
@@ -3547,20 +3587,13 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   regval &= ~SYSCON_SREMAC_R0;
   tiva_putreg(regval, TIVA_SYSCON_SREMAC);
 
-  /* Reset the internal PHY
-   *
-   * NOTE: If a custom PHY configuration is used, then that configuration
-   * will be lost after the reset.
-   */
+  /* Wait for the reset to complete */
 
-  regval  = tiva_getreg(TIVA_SYSCON_SREPHY);
-  regval |= SYSCON_SREPHY_R0;
-  tiva_putreg(regval, TIVA_SYSCON_SREPHY);
+  while (!tiva_emac_periphrdy());
+  up_udelay(250);
+#endif
 
-  regval &= ~SYSCON_SREPHY_R0;
-  tiva_putreg(regval, TIVA_SYSCON_SREPHY);
-
-  /* Perform a software reset by setting the SR bit in the DMABUSMOD register.
+  /* Perform a software reset by setting the SWR bit in the DMABUSMOD register.
    * This Resets all MAC subsystem internal registers and logic.  After this
    * reset all the registers holds their reset values.
    */
@@ -3569,21 +3602,18 @@ static void tiva_ethreset(FAR struct tiva_ethmac_s *priv)
   regval |= EMAC_DMABUSMOD_SWR;
   tiva_putreg(regval, TIVA_EMAC_DMABUSMOD);
 
-  /* Wait for software reset to complete. The SR bit is cleared automatically
+  /* Wait for software reset to complete. The SWR bit is cleared automatically
    * after the reset operation has completed in all of the core clock domains.
    */
 
   while ((tiva_getreg(TIVA_EMAC_DMABUSMOD) & EMAC_DMABUSMOD_SWR) != 0);
+  up_udelay(250);
 
-  /* If the RMII configuration is active when the Ethernet MAC is reset,
-   * then the interface is set back to its default MII configuration. In
-   * this case, the we must restore the RMII interface configuration.
-   *
-   * Also, if the PHY is used any custom configuration, then the PHY
-   * must be reconfigured after the reset.
+  /* Reconfigure the PHY.  Some PHY configurations will be lost as a
+   * consequence of the EMAC reset
    */
 
-  tiva_phy_reconfigure(priv);
+  tiva_phy_configure(priv);
 }
 
 /****************************************************************************
@@ -3690,11 +3720,11 @@ static void tiva_macaddress(FAR struct tiva_ethmac_s *priv)
   FAR struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
-  nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-          dev->d_ifname,
-          dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
-          dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
-          dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
+  nvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+        dev->d_ifname,
+        dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
+        dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
+        dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
 
@@ -3784,7 +3814,7 @@ static int tiva_macenable(FAR struct tiva_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: tiva_ethconfig
+ * Function: tive_emac_configure
  *
  * Description:
  *  Configure the Ethernet interface for DMA operation.
@@ -3799,22 +3829,22 @@ static int tiva_macenable(FAR struct tiva_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int tiva_ethconfig(FAR struct tiva_ethmac_s *priv)
+static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
 {
   int ret;
 
-  /* NOTE: The Ethernet clocks were initialized early in the boot-up
-   * sequence in tiva_rcc.c.
+  /* NOTE: The Ethernet clocks were initialized earlier in the start-up
+   * sequence.
    */
 
   /* Reset the Ethernet block */
 
-  nllvdbg("Reset the Ethernet block\n");
+  nvdbg("Reset the Ethernet block\n");
   tiva_ethreset(priv);
 
   /* Initialize the PHY */
 
-  nllvdbg("Initialize the PHY\n");
+  nvdbg("Initialize the PHY\n");
   ret = tiva_phyinit(priv);
   if (ret < 0)
     {
@@ -3823,7 +3853,7 @@ static int tiva_ethconfig(FAR struct tiva_ethmac_s *priv)
 
   /* Initialize the MAC and DMA */
 
-  nllvdbg("Initialize the MAC and DMA\n");
+  nvdbg("Initialize the MAC and DMA\n");
   ret = tiva_macconfig(priv);
   if (ret < 0)
     {
@@ -3844,7 +3874,7 @@ static int tiva_ethconfig(FAR struct tiva_ethmac_s *priv)
 
   /* Enable normal MAC operation */
 
-  nllvdbg("Enable normal operation\n");
+  nvdbg("Enable normal operation\n");
   return tiva_macenable(priv);
 }
 
@@ -3879,8 +3909,9 @@ static inline
 int tiva_ethinitialize(int intf)
 {
   struct tiva_ethmac_s *priv;
+  uint32_t regval;
 
-  nvdbg("intf: %d\n", intf);
+  nllvdbg("intf: %d\n", intf);
 
   /* Get the interface structure associated with this interface number. */
 
@@ -3907,6 +3938,15 @@ int tiva_ethinitialize(int intf)
   priv->txpoll        = wd_create();   /* Create periodic poll timer */
   priv->txtimeout     = wd_create();   /* Create TX timeout timer */
 
+#ifdef CONFIG_TIVA_BOARDMAC
+  /* If the board can provide us with a MAC address, get the address
+   * from the board now.  The MAC will not be applied until tiva_ifup()
+   * is called (and the MAC can be overwritten with a netdev ioctl call).
+   */
+
+  tiva_ethernetmac(&priv->dev.d_mac);
+#endif
+
   /* Enable power and clocking to the Ethernet MAC
    *
    * - Enable Power:  Applies power (only) to the EMAC peripheral.  This is not
@@ -3917,6 +3957,7 @@ int tiva_ethinitialize(int intf)
    *   bringing it a fully functional state.
    */
 
+  nllvdbg("Enable EMAC clocking\n");
   tiva_emac_enablepwr();   /* Ethernet MAC Power Control */
   tiva_emac_enableclk();   /* Ethernet MAC Run Mode Clock Gating Control */
 
@@ -3924,13 +3965,20 @@ int tiva_ethinitialize(int intf)
    * to be accessed.
    */
 
-  while (!tiva_emac_periphrdy())
-    {
-    }
+  while (!tiva_emac_periphrdy());
+  up_udelay(250);
 
-  /* Configure GPIOs to support the internal/eternal PHY */
+  /* Show all EMAC clocks */
 
-  tiva_phy_gpioconfig(priv);
+  nllvdbg("RCGCEMAC: %08x PCEMAC: %08x PREMAC: %08x MOSCCTL: %08x\n",
+          getreg32(TIVA_SYSCON_RCGCEMAC),
+          getreg32(TIVA_SYSCON_PCEMAC),
+          getreg32(TIVA_SYSCON_PREMAC),
+          getreg32(TIVA_SYSCON_MOSCCTL));
+
+  /* Configure clocking and GPIOs to support the internal/eternal PHY */
+
+  tiva_phy_initialize(priv);
 
   /* Attach the IRQ to the driver */
 
@@ -3941,14 +3989,38 @@ int tiva_ethinitialize(int intf)
       return -EAGAIN;
     }
 
+  /* Wait for EMAC to come out of reset. The SWR bit is cleared automatically
+   * after the reset operation has completed in all of the core clock domains.
+   */
+
+  while ((tiva_getreg(TIVA_EMAC_DMABUSMOD) & EMAC_DMABUSMOD_SWR) != 0);
+  up_udelay(250);
+
+#if 0 /* REVISIT: Part of work around to avoid DMABUSMOD SWR hangs */
   /* Put the interface in the down state. */
 
   tiva_ifdown(&priv->dev);
 
+#else
+  /* Reset the Ethernet MAC */
+
+  regval  = tiva_getreg(TIVA_SYSCON_SREMAC);
+  regval |= SYSCON_SREMAC_R0;
+  tiva_putreg(regval, TIVA_SYSCON_SREMAC);
+
+  regval &= ~SYSCON_SREMAC_R0;
+  tiva_putreg(regval, TIVA_SYSCON_SREMAC);
+
+  /* Wait for the reset to complete */
+
+  while (!tiva_emac_periphrdy());
+  up_udelay(250);
+#endif
+
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev, NET_LL_ETHERNET);
-  return OK;
+  nllvdbg("Registering Ethernet device\n");
+  return netdev_register(&priv->dev, NET_LL_ETHERNET);
 }
 
 /****************************************************************************
@@ -3977,6 +4049,117 @@ void up_netinitialize(void)
   (void)tiva_ethinitialize(0);
 }
 #endif
+
+/****************************************************************************
+ * Name: arch_phy_irq
+ *
+ * Description:
+ *   This function may be called to register an interrupt handler that will
+ *   be called when a PHY interrupt occurs.  This function both attaches
+ *   the interrupt handler and enables the interrupt if 'handler' is non-
+ *   NULL.  If handler is NULL, then the interrupt is detached and disabled
+ *   instead.
+ *
+ *   The PHY interrupt is always disabled upon return.  The caller must
+ *   call back through the enable function point to control the state of
+ *   the interrupt.
+ *
+ *   This interrupt may or may not be available on a given platform depending
+ *   on how the network hardware architecture is implemented.  In a typical
+ *   case, the PHY interrupt is provided to board-level logic as a GPIO
+ *   interrupt (in which case this is a board-specific interface and really
+ *   should be called board_phy_irq()); In other cases, the PHY interrupt
+ *   may be cause by the chip's MAC logic (in which case arch_phy_irq()) is
+ *   an appropriate name.  Other other boards, there may be no PHY interrupts
+ *   available at all.  If client attachable PHY interrupts are available
+ *   from the board or from the chip, then CONFIG_ARCH_PHY_INTERRUPT should
+ *   be defined to indicate that fact.
+ *
+ *   Typical usage:
+ *   a. OS service logic (not application logic*) attaches to the PHY
+ *      PHY interrupt and enables the PHY interrupt.
+ *   b. When the PHY interrupt occurs:  (1) the interrupt should be
+ *      disabled and () work should be scheduled on the worker thread (or
+ *      perhaps a dedicated application thread).
+ *   c. That worker thread should use the SIOCGMIIPHY, SIOCGMIIREG,
+ *      and SIOCSMIIREG ioctl calls** to communicate with the PHY,
+ *      determine what network event took place (Link Up/Down?), and
+ *      take the appropriate actions.
+ *   d. It should then interact the the PHY to clear any pending
+ *      interrupts, then re-enable the PHY interrupt.
+ *
+ *    * This is an OS internal interface and should not be used from
+ *      application space.  Rather applications should use the SIOCMIISIG
+ *      ioctl to receive a signal when a PHY event occurs.
+ *   ** This interrupt is really of no use if the Ethernet MAC driver
+ *      does not support these ioctl calls.
+ *
+ * Input Parameters:
+ *   intf    - Identifies the network interface.  For example "eth0".  Only
+ *             useful on platforms that support multiple Ethernet interfaces
+ *             and, hence, multiple PHYs and PHY interrupts.
+ *   handler - The client interrupt handler to be invoked when the PHY
+ *             asserts an interrupt.  Must reside in OS space, but can
+ *             signal tasks in user space.  A value of NULL can be passed
+ *             in order to detach and disable the PHY interrupt.
+ *   enable  - A function pointer that be unsed to enable or disable the
+ *             PHY interrupt.
+ *
+ * Returned Value:
+ *   The previous PHY interrupt handler address is returned.  This allows you
+ *   to temporarily replace an interrupt handler, then restore the original
+ *   interrupt handler.  NULL is returned if there is was not handler in
+ *   place when the call was made.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_PHY_INTERRUPTS
+xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
+{
+  struct tiva_ethmac_s *priv;
+  irqstate_t flags;
+  xcpt_t oldhandler;
+
+  DEBUGASSERT(intf);
+  nvdbg("%s: handler=%p\n", intf, handler);
+
+  /* Get the interface structure associated with this interface. */
+
+#if TIVA_NETHCONTROLLERS > 1
+  /* REVISIT: Additional logic needed if there are multiple EMACs */
+
+  warning Missing logic
+#endif
+  priv = g_tiva_ethmac;
+
+  /* Disable interrupts until we are done.  This guarantees that the
+   * following operations are atomic.
+   */
+
+  flags = irqsave();
+
+  /* Get the old interrupt handler and save the new one */
+
+  oldhandler    = priv->handler;
+  priv->handler = handler;
+
+  /* Return with the interrupt disabled in any case */
+
+  tiva_phyintenable(false);
+
+  /* Return the enabling function pointer */
+
+  if (enable)
+    {
+      *enable = handler ? tiva_phyintenable : NULL;;
+    }
+
+  /* Return the old handler (so that it can be restored) */
+
+  irqrestore(flags);
+  return oldhandler;
+}
+#endif /* CONFIG_TIVA_PHY_INTERRUPTS */
 
 #endif /* TIVA_NETHCONTROLLERS > 0 */
 #endif /* CONFIG_NET && CONFIG_TIVA_ETHERNET */

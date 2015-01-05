@@ -655,13 +655,6 @@ config TIVA_ETHLEDS
 	---help---
 	Enable to use Ethernet LEDs on the board.
 
-config TIVA_BOARDMAC
-	bool "Board MAC"
-	default n
-	---help---
-		If the board-specific logic can provide a MAC address (via
-		tiva_ethernetmac()), then this should be selected.
-
 config TIVA_ETHHDUPLEX
 	bool "Force Half Duplex"
 	default n
@@ -736,17 +729,19 @@ config TIVA_PHY_RMII
 
 endchoice # PHY selection
 
-config TIVA_PHYADDR
-	int "PHY address"
-	default 1
-	---help---
-		The 5-bit address of the PHY on the board.  Default: 1
-
 config TIVA_AUTONEG
 	bool "Use autonegotiation"
 	default y
 	---help---
 		Use PHY autonegotiation to determine speed and mode
+
+if !TIVA_PHY_INTERNAL
+
+config TIVA_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
 
 if !TIVA_AUTONEG
 config TIVA_ETHFD
@@ -845,6 +840,17 @@ config TIVA_PHYSR_100FD
 
 endif # TIVA_PHYSR_ALTCONFIG
 endif # TIVA_AUTONEG
+endif # !TIVA_PHY_INTERNAL
+
+config TIVA_PHY_INTERRUPTS
+	bool "PHY interrupt support"
+	select ARCH_PHY_INTERRUPT
+	select NETDEV_PHY_IOCTL
+	default n
+	---help---
+		Enable logic to signal user tasks when a PHY interrupt occurs.  The
+		PHY interrupt may indicate a change in the link status such as, for
+		example, when a cable is plugged in or unplugged.
 
 config TIVA_EMAC_NRXDESC
 	int "Number of RX descriptors"
@@ -886,6 +892,14 @@ config TIVA_ETHERNET_REGDEBUG
 		Enable very low-level register access debug.  Depends on DEBUG.
 
 endmenu # Tiva Ethernet Configuration
+
+config TIVA_BOARDMAC
+	bool "Board MAC"
+	default n
+	---help---
+		If the board-specific logic can provide a MAC address (via
+		tiva_ethernetmac()), then this should be selected.
+
 endif # TIVA_ETHERNET
 
 if TIVA_SSI
