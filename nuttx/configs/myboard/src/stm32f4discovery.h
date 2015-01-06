@@ -164,8 +164,8 @@
 
 /* SPI chip selects */
 
-#define GPIO_CS_MEMS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN3)
+#define GPIO_CS_FLASH      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
 
 /* USB OTG FS
  *

@@ -286,11 +286,12 @@
 
 #define GPIO_TIM4_CH2OUT GPIO_TIM4_CH2OUT_2
 
-/* SPI - There is a MEMS device on SPI1 using these pins: */
+/* SPI - There is a flash device on SPI2 using these pins: */
 
-#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
-#define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1
+#define GPIO_SPI2_MISO GPIO_SPI2_MISO_1
+#define GPIO_SPI2_MOSI GPIO_SPI2_MOSI_1
+#define GPIO_SPI2_SCK  GPIO_SPI2_SCK_1
+
 
 /* Timer Inputs/Outputs (see the README.txt file for options) */
 
