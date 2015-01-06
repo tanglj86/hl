@@ -88,23 +88,14 @@
  * Name: stm32_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the stm32f4discovery board.
+ *   Called to configure SPI chip select GPIO pins for the  board.
  *
  ************************************************************************************/
 
 void weak_function stm32_spiinitialize(void)
 {
-#ifdef CONFIG_STM32_SPI1
-  (void)stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
-#endif
-#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
-  (void)stm32_configgpio(GPIO_OLED_CS);    /* OLED chip select */
-# if defined(CONFIG_LCD_UG2864AMBAG01)
-  (void)stm32_configgpio(GPIO_OLED_A0);    /* OLED Command/Data */
-# endif
-# if defined(CONFIG_LCD_UG2864HSWEG01)
-  (void)stm32_configgpio(GPIO_OLED_DC);    /* OLED Command/Data */
-# endif
+#ifdef CONFIG_STM32_SPI2
+  (void)stm32_configgpio(GPIO_CS_FLASH);    /* SPI flash chip select */
 #endif
 }
 
@@ -160,6 +151,7 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  stm32_gpiowrite(GPIO_CS_FLASH, !selected);
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)

@@ -44,6 +44,11 @@
 #include <debug.h>
 #include <errno.h>
 
+#ifdef CONFIG_STM32_SPI2
+#  include <nuttx/spi/spi.h>
+#  include <nuttx/mtd/mtd.h>
+#endif
+
 #ifdef CONFIG_SYSTEM_USBMONITOR
 #  include <apps/usbmonitor.h>
 #endif
@@ -79,7 +84,32 @@
 
 int stm32_bringup(void)
 {
+#ifdef CONFIG_STM32_SPI2
+  FAR struct spi_dev_s *spi;
+  FAR struct mtd_dev_s *mtd;
+#endif
   int ret = OK;
+
+#ifdef CONFIG_STM32_SPI2
+  /* Get the SPI port */
+
+  spi = up_spiinitialize(2);
+  if (!spi)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port 2\n");
+      return -ENODEV;
+    }
+
+  /* Now bind the SPI interface to the M25P16 SPI FLASH driver */
+
+  mtd = m25p_initialize(spi);
+  if (!mtd)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to bind SPI port 2 to the SPI FLASH driver\n");
+      return -ENODEV;
+    }
+#warning "Now what are we going to do with this SPI FLASH driver?"
+#endif
 
 #ifdef HAVE_SDIO
   /* Initialize the SDIO block driver */
