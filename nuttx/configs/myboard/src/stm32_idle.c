@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f4discovery/src/stm32_idle.c
+ * configs/myboard/src/stm32_idle.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,7 @@
 #include "stm32_rcc.h"
 #include "stm32_exti.h"
 
-#include "stm32f4discovery.h"
+#include "myboard_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

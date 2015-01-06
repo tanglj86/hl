@@ -1,7 +1,7 @@
 /**************************************************************************************
  * configs/stm32fdiscover/src/stm32_ssd1289.c
  *
- * This logic supports the connection of an SSD1289-based LCD to the STM32F4Discovery
+ * This logic supports the connection of an SSD1289-based LCD to the myboard
  * board.
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
@@ -58,7 +58,7 @@
 
 #include "up_arch.h"
 #include "stm32.h"
-#include "stm32f4discovery.h"
+#include "myboard_internal.h"
 
 #ifdef CONFIG_LCD_SSD1289
 
@@ -85,7 +85,7 @@
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-/* STM32F4Discovery LCD Hardware Definitions ******************************************/
+/* myboard LCD Hardware Definitions ******************************************/
 /* LCD /CS is CE1 ==  NOR/SRAM Bank 1
  *
  * Bank 1 = 0x60000000 | 0x00000000
@@ -141,7 +141,7 @@ static void stm32_backlight(FAR struct ssd1289_lcd_s *dev, int power);
  * MAPPING TO STM32 F4:
  *
  *  ---------------- ------------- ----------------------------------
- *   STM32 FUNCTION  LCD PIN       STM32F4Discovery PIN
+ *   STM32 FUNCTION  LCD PIN       myboard PIN
  *  ---------------- ------------- ----------------------------------
  *   FSMC_D0          D0    pin 4   PD14 P1 pin 46 Conflict (Note 1)
  *   FSMC_D1          D1    pin 3   PD15 P1 pin 47 Conflict (Note 2)

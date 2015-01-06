@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/stm32_pwm.c
+ * configs/myboard/src/stm32_pwm.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "stm32_pwm.h"
-#include "stm32f4discovery.h"
+#include "myboard_internal.h"
 
 /************************************************************************************
  * Definitions
@@ -56,7 +56,7 @@
 /* Configuration *******************************************************************/
 /* PWM
  *
- * The stm32f4discovery has no real on-board PWM devices, but the board can be configured to output
+ * The myboard has no real on-board PWM devices, but the board can be configured to output
  * a pulse train using TIM4 CH2.  This pin is used by FSMC is connect to CN5 just for this
  * purpose:
  *
@@ -79,7 +79,7 @@
 #  undef HAVE_PWM
 #endif
 
-#if CONFIG_STM32_TIM4_CHANNEL != STM32F4DISCOVERY_PWMCHANNEL
+#if CONFIG_STM32_TIM4_CHANNEL != MYBOARD_PWMCHANNEL
 #  undef HAVE_PWM
 #endif
 
@@ -114,7 +114,7 @@ int pwm_devinit(void)
     {
       /* Call stm32_pwminitialize() to get an instance of the PWM interface */
 
-      pwm = stm32_pwminitialize(STM32F4DISCOVERY_PWMTIMER);
+      pwm = stm32_pwminitialize(MYBOARD_PWMTIMER);
       if (!pwm)
         {
           dbg("Failed to get the STM32 PWM lower half\n");

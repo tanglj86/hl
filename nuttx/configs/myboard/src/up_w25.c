@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/myboard/src/stm32_nsh.c
+ * config/myboard/src/up_w25.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,129 +39,114 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
+
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
 #include <errno.h>
+#include <debug.h>
 
-#include "stm32.h"
+#ifdef CONFIG_STM32_SPI2
+#  include <nuttx/spi/spi.h>
+#  include <nuttx/mtd/mtd.h>
+#  include <nuttx/fs/nxffs.h>
+#endif
+
 #include "myboard_internal.h"
-
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
-
-/* Assume that we support everything until convinced otherwise */
-
-#define HAVE_SDIO    1
-#define HAVE_USBDEV   1
-#define HAVE_USBHOST  1
-#define HAVE_W25      1
-
 /* Can't support the W25 device if it SPI1 or W25 support is not enabled */
 
+#define HAVE_W25  1
 #if !defined(CONFIG_STM32_SPI2) || !defined(CONFIG_MTD_W25)
 #  undef HAVE_W25
 #endif
 
 /* Can't support W25 features if mountpoints are disabled */
 
-#ifdef CONFIG_DISABLE_MOUNTPOINT
+#if defined(CONFIG_DISABLE_MOUNTPOINT)
 #  undef HAVE_W25
 #endif
 
-/* Default W25 minor number */
+/* Can't support both FAT and NXFFS */
 
-#if defined(HAVE_W25) && !defined(CONFIG_NSH_W25MINOR)
-#  define CONFIG_NSH_W25MINOR 0
+#if defined(CONFIG_FS_FAT) && defined(CONFIG_FS_NXFFS)
+#  warning "Can't support both FAT and NXFFS -- using FAT"
 #endif
-
-/* Can't support USB host or device features if USB OTG FS is not enabled */
-
-#ifndef CONFIG_STM32_OTGFS
-#  undef HAVE_USBDEV
-#  undef HAVE_USBHOST
-#endif
-
-/* Can't support USB device is USB device is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef HAVE_USBDEV
-#endif
-
-/* Can't support USB host is USB host is not enabled */
-
-#ifndef CONFIG_USBHOST
-#  undef HAVE_USBHOST
-#endif
-
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: stm32_w25initialize
  *
  * Description:
- *   Perform architecture-specific initialization (if this was not already
- *   done by board_initialize();
+ *   Initialize and register the W25 FLASH file system.
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int stm32_w25initialize(int minor)
 {
-#if defined(HAVE_SDIO) || defined(HAVE_USBHOST) || defined(HAVE_W25)
-  int ret;
-#endif
-
-  /* Initialize and register the W25 FLASH file system. */
-
 #ifdef HAVE_W25
-  ret = stm32_w25initialize(CONFIG_NSH_W25MINOR);
+  FAR struct spi_dev_s *spi;
+  FAR struct mtd_dev_s *mtd;
+#ifdef CONFIG_FS_NXFFS
+  char devname[12];
+#endif
+  int ret;
+
+  /* Get the SPI port */
+
+  spi = up_spiinitialize(2);
+  if (!spi)
+    {
+      fdbg("ERROR: Failed to initialize SPI port 2\n");
+      return -ENODEV;
+    }
+
+  /* Now bind the SPI interface to the W25 SPI FLASH driver */
+
+  mtd = w25_initialize(spi);
+  if (!mtd)
+    {
+      fdbg("ERROR: Failed to bind SPI port 2 to the Winbond 25 FLASH driver\n");
+      return -ENODEV;
+    }
+
+#ifndef CONFIG_FS_NXFFS
+  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+
+  ret = ftl_initialize(minor, mtd);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize W25 minor %d: %d\n",
-              CONFIG_NSH_W25MINOR, ret);
+      fdbg("ERROR: Initialize the FTL layer\n");
       return ret;
     }
-#endif
+#else
+  /* Initialize to provide NXFFS on the MTD interface */
 
-  /* Initialize the SDIO-based MMC/SD slot */
-
-#ifdef HAVE_SDIO
-  ret = stm32_sdio_initialize();
+  ret = nxffs_initialize(mtd);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize MMC/SD driver: %d\n", ret);
+      fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
+      return ret;
+    }
+
+  /* Mount the file system at /mnt/w25 */
+
+  snprintf(devname, 12, "/mnt/w25%c", 'a' + minor);
+  ret = mount(NULL, devname, "nxffs", 0, NULL);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
       return ret;
     }
 #endif
-
-  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
-   */
-
-#ifdef HAVE_USBHOST
-  ret = stm32_usbhost_initialize();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef HAVE_USBMONITOR
-  /* Start the USB Monitor */
-
-  ret = usbmonitor_start(0, NULL);
-  if (ret != OK)
-    {
-      udbg("Start USB monitor: %d\n", ret);
-    }
 #endif
   return OK;
 }
-

@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f4discovery/src/stm32_pm.c
+ * configs/myboard/src/stm32_pm.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 
 #include "up_internal.h"
 #include "stm32_pm.h"
-#include "stm32f4discovery.h"
+#include "myboard_internal.h"
 
 #ifdef CONFIG_PM
 

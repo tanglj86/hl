@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f4discovery/src/stm32_userleds.c
+ * configs/myboard/src/stm32_userleds.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
-#include "stm32f4discovery.h"
+#include "myboard_internal.h"
 
 #ifndef CONFIG_ARCH_LEDS
 

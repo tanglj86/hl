@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f4discovery/src/stm32_pm_buttons.c
+ * configs/myboard/src/stm32_pm_buttons.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
 #include "nvic.h"
 #include "stm32_pwr.h"
 #include "stm32_pm.h"
-#include "stm32f4discovery.h"
+#include "myboard_internal.h"
 
 #if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
 
@@ -122,7 +122,7 @@ static int button_handler(int irq, FAR void *context)
  * Name: stm32_pm_buttons
  *
  * Description:
- *   Configure the user button of the STM32f4discovery board as EXTI,
+ *   Configure the user button of the myboard board as EXTI,
  *   so it is able to wakeup the MCU from the PM_STANDBY mode
  *
  ****************************************************************************/

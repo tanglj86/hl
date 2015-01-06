@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/stm32_usb.c
+ * configs/myboard/src/stm32_usb.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +53,7 @@
 #include "up_arch.h"
 #include "stm32.h"
 #include "stm32_otgfs.h"
-#include "stm32f4discovery.h"
+#include "myboard_internal.h"
 
 #ifdef CONFIG_STM32_OTGFS
 
@@ -139,7 +139,7 @@ static int usbhost_waiter(int argc, char *argv[])
  *
  * Description:
  *   Called from stm32_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the STM32F4Discovery board.
+ *   GPIO pins for the myboard board.
  *
  ************************************************************************************/
 

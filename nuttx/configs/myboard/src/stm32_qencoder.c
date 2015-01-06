@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/stm32_qencoder.c
+ * configs/myboard/src/stm32_qencoder.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "stm32_qencoder.h"
-#include "stm32f4discovery.h"
+#include "myboard_internal.h"
 
 /************************************************************************************
  * Definitions

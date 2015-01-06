@@ -70,10 +70,7 @@ fi
 # toolchain.
 export TOOLCHAIN_BIN="/home/tlj/nuttx/codebench/gcc-arm-none-eabi-4_8-2014q3/bin"
 
-# This the Cygwin path to the location where I built genromfs.  If you use
-# the buildroot toolchain, then genromfs can probably be found in TOOLCHAIN_DIR
-export GENROMFS_PATH="/home/tlj/nuttx/nuttx-code/misc/tools/genromfs-0.5.2"
 # Add the path to the toolchain to the PATH varialble
-export PATH="${TOOLCHAIN_BIN}:${GENROMFS_PATH}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"

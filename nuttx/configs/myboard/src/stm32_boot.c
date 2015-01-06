@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/stm32_boot.c
+ * configs/myboard/src/stm32_boot.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "stm32f4discovery.h"
+#include "myboard_internal.h"
 
 /************************************************************************************
  * Definitions

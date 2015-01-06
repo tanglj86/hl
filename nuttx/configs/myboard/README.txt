@@ -2,7 +2,7 @@ README
 ======
 
 This README discusses issues unique to NuttX configurations for the
-STMicro STM32F4Discovery development board featuring the STM32F407VGT6
+STMicro myboard development board featuring the STM32F407VGT6
 MCU. The STM32F407VGT6 is a 168MHz Cortex-M4 operation with 1Mbit Flash
 memory and 128kbytes. The board features:
 
@@ -35,7 +35,7 @@ Contents
   - FSMC SRAM
   - SSD1289
   - UG-2864AMBAG01 / UG-2864HSWEG01
-  - STM32F4Discovery-specific Configuration Options
+  - myboard-specific Configuration Options
   - Configurations
 
 Development Environment
@@ -195,7 +195,7 @@ NuttX EABI "buildroot" Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh STM32F4Discovery/<sub-dir>
+     ./configure.sh myboard/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -279,7 +279,7 @@ NXFLAT Toolchain
 LEDs
 ====
 
-The STM32F4Discovery board has four LEDs; green, orange, red and blue on the
+The myboard board has four LEDs; green, orange, red and blue on the
 board. These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in
 include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
@@ -308,7 +308,7 @@ events as follows:
 PWM
 ===
 
-The STM32F4Discovery has no real on-board PWM devices, but the board can be
+The myboard has no real on-board PWM devices, but the board can be
 configured to output a pulse train using TIM4 CH2 on PD3.  This pin is
 available next to the audio jack.
 
@@ -350,7 +350,7 @@ USART6
   TX      PC6, PG14**
 
  * Indicates pins that have other on-board functions and should be used only
-   with care (See table 5 in the STM32F4Discovery User Guide).  The rest are
+   with care (See table 5 in the myboard User Guide).  The rest are
    free I/O pins.
 ** Port G pins are not supported by the MCU
 
@@ -414,7 +414,7 @@ TIM14
   CH1     PA7*, PF9
 
  * Indicates pins that have other on-board functions and should be used only
-   with care (See table 5 in the STM32F4Discovery User Guide).  The rest are
+   with care (See table 5 in the myboard User Guide).  The rest are
    free I/O pins.
 ** Port H pins are not supported by the MCU
 
@@ -554,7 +554,7 @@ FSMC SRAM
 
 On-board SRAM
 -------------
-The STM32F4Discovery has no on-board SRAM.  The information here is only for
+The myboard has no on-board SRAM.  The information here is only for
 reference in case you choose to add some.
 
 Configuration Options
@@ -647,7 +647,7 @@ LCD CONNECTOR:          SSD1289 MPU INTERFACE PINS:
 MAPPING TO STM32 F4:
 
   ---------------- -------------- ----------------------------------
-   STM32 FUNCTION  LCD PIN       STM32F4Discovery PIN
+   STM32 FUNCTION  LCD PIN       myboard PIN
   ---------------- -------------- ----------------------------------
    FSMC_D0          D0     pin 4   PD14 P1 pin 46 Conflict (Note 1)
    FSMC_D1          D1     pin 3   PD15 P1 pin 47 Conflict (Note 2)
@@ -681,7 +681,7 @@ MAPPING TO STM32 F4:
    4 Also the reset pin for the CS43L22 audio Codec.
 
 NOTE:  The configuration to test this LCD configuration is available at
-configs/stm32f4discovery/nxlines.  As of this writing, I have not seen the
+configs/myboard/nxlines.  As of this writing, I have not seen the
 LCD working so I probably have some things wrong.
 
 I might need to use a bit-banging interface.  Below is the pin configuration
@@ -757,7 +757,7 @@ pinout for the UG-2864AMBAG01 is specific to the theO.net display board
 that I am using:
 
   --------------------------+----------------------------------------------
-  Connector CON10 J1:       | STM32F4Discovery
+  Connector CON10 J1:       | myboard
   --------------+-----------+----------------------------------------------
   CON10 J1:     | CON20 J2: | P1/P2:
   --------------+-----------+----------------------------------------------
@@ -777,9 +777,9 @@ that I am using:
 
 Darcy Gong recently added support for the UG-2864HSWEG01 OLED which is also
 an option with this configuration.  I have little technical information about
-the UG-2864HSWEG01 interface (see configs/stm32f4discovery/src/up_ug2864hsweg01.c).
+the UG-2864HSWEG01 interface (see configs/myboard/src/up_ug2864hsweg01.c).
 
-STM32F4Discovery-specific Configuration Options
+myboard-specific Configuration Options
 ===============================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
@@ -812,7 +812,7 @@ STM32F4Discovery-specific Configuration Options
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=STM32F4Discovery (for the STM32F4Discovery development board)
+       CONFIG_ARCH_BOARD=myboard (for the myboard development board)
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
@@ -845,7 +845,7 @@ STM32F4Discovery-specific Configuration Options
 
     CONFIG_HEAP2_SIZE - The size of the SRAM in the FSMC address space (decimal)
 
-    CONFIG_ARCH_FPU - The STM32F4Discovery supports a floating point unit (FPU)
+    CONFIG_ARCH_FPU - The myboard supports a floating point unit (FPU)
 
        CONFIG_ARCH_FPU=y
 
@@ -966,7 +966,7 @@ STM32F4Discovery-specific Configuration Options
       but without JNTRST.
     CONFIG_STM32_JTAG_SW_ENABLE - Set JTAG-DP disabled and SW-DP enabled
 
-  STM32F4Discovery specific device driver settings
+  myboard specific device driver settings
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=1,2,3) or UART
            m (m=4,5) for the console and ttys0 (default is the USART1).
@@ -979,7 +979,7 @@ STM32F4Discovery-specific Configuration Options
     CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
     CONFIG_U[S]ARTn_2STOP - Two stop bits
 
-  STM32F4Discovery CAN Configuration
+  myboard CAN Configuration
 
     CONFIG_CAN - Enables CAN support (one or both of CONFIG_STM32_CAN1 or
       CONFIG_STM32_CAN2 must also be defined)
@@ -998,7 +998,7 @@ STM32F4Discovery-specific Configuration Options
     CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
       dump of all CAN registers.
 
-  STM32F4Discovery SPI Configuration
+  myboard SPI Configuration
 
     CONFIG_STM32_SPI_INTERRUPTS - Select to enable interrupt driven SPI
       support. Non-interrupt-driven, poll-waiting is recommended if the
@@ -1006,7 +1006,7 @@ STM32F4Discovery-specific Configuration Options
     CONFIG_STM32_SPI_DMA - Use DMA to improve SPI transfer performance.
       Cannot be used with CONFIG_STM32_SPI_INTERRUPT.
 
-  STM32F4Discovery DMA Configuration
+  myboard DMA Configuration
 
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
@@ -1045,18 +1045,18 @@ STM32F4Discovery-specific Configuration Options
 Configurations
 ==============
 
-Each STM32F4Discovery configuration is maintained in a sub-directory and
+Each myboard configuration is maintained in a sub-directory and
 can be selected as follow:
 
     cd tools
-    ./configure.sh STM32F4Discovery/<subdir>
+    ./configure.sh myboard/<subdir>
     cd -
     . ./setenv.sh
 
 If this is a Windows native build, then configure.bat should be used
 instead of configure.sh:
 
-    configure.bat STM32F4Discovery\<subdir>
+    configure.bat myboard\<subdir>
 
 Where <subdir> is one of the following:
 
@@ -1370,7 +1370,7 @@ Where <subdir> is one of the following:
 
      8. Using the USB console.
 
-        The STM32F4Discovery NSH configuration can be set up to use a USB CDC/ACM
+        The myboard NSH configuration can be set up to use a USB CDC/ACM
         (or PL2303) USB console.  The normal way that you would configure the
         the USB console would be to change the .config file like this:
 
@@ -1425,7 +1425,7 @@ Where <subdir> is one of the following:
           USB trace output and the USB monitor.
 
    10. USB OTG FS Host Support.  The following changes will enable support for
-       a USB host on the STM32F4Discovery, including support for a mass storage
+       a USB host on the myboard, including support for a mass storage
        class driver:
 
        CONFIG_USBDEV=n          : Make sure tht USB device support is disabled
@@ -1491,10 +1491,10 @@ Where <subdir> is one of the following:
       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
       CONFIG_LCD_LANDSCAPE=y                  : 320x240 landscape orientation
 
-    The STM32F4Discovery board does not have any graphics capability.  This
+    The myboard board does not have any graphics capability.  This
     configuration assumes that you have connected an SD1289-based LCD as
     described above under "SSD1289".  NOTE:  At present, it has not been
-    proven that the STM32F4Discovery can actually drive an LCD.  There are
+    proven that the myboard can actually drive an LCD.  There are
     some issues with how some of the dedicated FSMC pins are used on the
     boards.  This configuration may not be useful and may only serve as
     an illustration of how to build for th SSD1289 LCD.
@@ -1650,7 +1650,7 @@ Where <subdir> is one of the following:
 
     This is another NSH example.  If differs from other 'nsh' configurations
     in that this configurations uses a USB serial device for console I/O.
-    Such a configuration is useful on the stm32f4discovery which has no
+    Such a configuration is useful on the myboard which has no
     builtin RS-232 drivers.
 
     NOTES:

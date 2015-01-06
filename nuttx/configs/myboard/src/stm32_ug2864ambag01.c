@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f4discovery/src/stm32_ug2864ambag01.c
+ * config/myboard/src/stm32_ug2864ambag01.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <nuttx/lcd/ug-2864ambag01.h>
 
 #include "stm32_gpio.h"
-#include "stm32f4discovery.h"
+#include "myboard_internal.h"
 
 #ifdef CONFIG_LCD_UG2864AMBAG01
 
@@ -68,7 +68,7 @@
 /* UG-2864AMBAG01 OLED Display (SPI 4-wire):
  *
  * --------------------------+----------------------------------------------
- * Connector CON10 J1:      | STM32F4Discovery
+ * Connector CON10 J1:      | myboard
  * --------------+-----------+----------------------------------------------
  * CON10 J1:     | CON20 J2: | P1/P2:
  * --------------+-----------+----------------------------------------------
@@ -88,7 +88,7 @@
  * -------------------------------------------------------------------------
  */
 
-/* Definitions in stm32f4discovery.h */
+/* Definitions in myboard_internal.h */
 
 /* Debug ********************************************************************/
 
