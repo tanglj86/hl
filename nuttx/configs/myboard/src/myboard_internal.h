@@ -67,7 +67,62 @@
 #define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
 #define HAVE_SDIO       1
+#define HAVE_AT24       1
+#define HAVE_W25        1
 
+/* Can't support the W25 device if it SPI1 or W25 support is not enabled */
+
+#if !defined(CONFIG_STM32_SPI2) || !defined(CONFIG_MTD_W25)
+#  undef HAVE_W25
+#endif
+
+/* Can't support W25 features if mountpoints are disabled */
+
+#ifdef CONFIG_DISABLE_MOUNTPOINT
+#  undef HAVE_W25
+#endif
+
+/* Default W25 minor number */
+
+#if defined(HAVE_W25) && !defined(CONFIG_NSH_W25MINOR)
+#  define CONFIG_NSH_W25MINOR 0
+#endif
+
+
+#define AT24_BUS   2
+#define AT24_MINOR 1
+
+#if !defined(CONFIG_MTD_AT24XX)
+#  undef HAVE_AT24
+#endif
+
+/* Can't support AT24 features if mountpoints are disabled or if we were not
+ * asked to mount the AT24 part
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT)
+#  undef HAVE_AT24
+#endif
+
+/* If we are going to mount the AT24, then they user must also have told
+ * us what to do with it by setting one of these.
+ */
+
+#ifndef CONFIG_FS_NXFFS
+#  undef CONFIG_MYBOARD_AT24_NXFFS
+#endif
+
+#if !defined(CONFIG_MYBOARD_AT24_FTL) && \
+    !defined(CONFIG_MYBOARD_AT24_NXFFS)
+#  undef HAVE_AT24
+#endif
+
+#if defined(CONFIG_MYBOARD_AT24_FTL) && \
+   defined(CONFIG_MYBOARD_AT24_NXFFS)
+#  warning Both CONFIG_MYBOARD_AT24_FTL and CONFIG_MYBOARD_AT24_NXFFS are set
+#  warning Ignoring CONFIG_MYBOARD_AT24_NXFFS
+#  undef CONFIG_MYBOARD_AT24_NXFFS
+#endif
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
 #ifndef CONFIG_STM32_OTGFS

@@ -51,52 +51,6 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-/* Assume that we support everything until convinced otherwise */
-
-#define HAVE_SDIO    1
-#define HAVE_USBDEV   1
-#define HAVE_USBHOST  1
-#define HAVE_W25      1
-
-/* Can't support the W25 device if it SPI1 or W25 support is not enabled */
-
-#if !defined(CONFIG_STM32_SPI2) || !defined(CONFIG_MTD_W25)
-#  undef HAVE_W25
-#endif
-
-/* Can't support W25 features if mountpoints are disabled */
-
-#ifdef CONFIG_DISABLE_MOUNTPOINT
-#  undef HAVE_W25
-#endif
-
-/* Default W25 minor number */
-
-#if defined(HAVE_W25) && !defined(CONFIG_NSH_W25MINOR)
-#  define CONFIG_NSH_W25MINOR 0
-#endif
-
-/* Can't support USB host or device features if USB OTG FS is not enabled */
-
-#ifndef CONFIG_STM32_OTGFS
-#  undef HAVE_USBDEV
-#  undef HAVE_USBHOST
-#endif
-
-/* Can't support USB device is USB device is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef HAVE_USBDEV
-#endif
-
-/* Can't support USB host is USB host is not enabled */
-
-#ifndef CONFIG_USBHOST
-#  undef HAVE_USBHOST
-#endif
-
 
 /****************************************************************************
  * Public Functions
@@ -113,10 +67,22 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(HAVE_SDIO) || defined(HAVE_USBHOST) || defined(HAVE_W25)
+#if defined(HAVE_SDIO) || defined(HAVE_USBHOST) || defined(HAVE_W25) || defined(HAVE_AT24)
   int ret;
 #endif
 
+#ifdef HAVE_AT24
+
+  /* Initialize the AT24 driver */
+
+  ret = stm32_at24_automount(AT24_MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_at24_automount failed: %d\n", ret);
+    }
+
+  return ret;
+#endif
   /* Initialize and register the W25 FLASH file system. */
 
 #ifdef HAVE_W25

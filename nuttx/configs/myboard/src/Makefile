@@ -109,7 +109,11 @@ CSRCS += stm32_ug2864hsweg01.c
 endif
 
 ifeq ($(CONFIG_MTD_W25),y)
-CSRCS += up_w25.c
+CSRCS += stm32_w25.c
+endif
+
+ifeq ($(CONFIG_MTD_AT24XX),y)
+CSRCS += stm32_at24.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
