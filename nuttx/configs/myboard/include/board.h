@@ -260,13 +260,13 @@
  *   PD0   = FSMC_D2 & CAN1_RX
  *   PD1   = FSMC_D3 & CAN1_TX
  *   PB13  = ULPI_D6 & CAN2_TX
- *   PB5   = ULPI_D7 & CAN2_RX
+ *   PB12  = ULPI_D7 & CAN2_RX
  */
 
 #define GPIO_CAN1_RX        GPIO_CAN1_RX_3
 #define GPIO_CAN1_TX        GPIO_CAN1_TX_3
 
-#define GPIO_CAN2_RX        GPIO_CAN2_RX_2
+#define GPIO_CAN2_RX        GPIO_CAN2_RX_1
 #define GPIO_CAN2_TX        GPIO_CAN2_TX_1
 
 /* I2C.  I2C2 is available for EEPROM.  I2C2_SCL and I2C2_SDA are
@@ -311,8 +311,8 @@
 
 #  ifndef CONFIG_STM32_RMII
 #    error "CONFIG_STM32_RMII must be defined"
-#  elif !defined(CONFIG_STM32_MII_MCO1)
-#    warning "CONFIG_STM32_MII_MCO1 required for Ethernet MII"
+#  elif !defined(CONFIG_STM32_RMII_MCO1)
+#    warning "CONFIG_STM32_RMII_MCO1 required for Ethernet RMII"
 #  else
 
   /* Output HSE clock (25MHz) on MCO1 pin (PA8) to clock the PHY */
@@ -322,10 +322,10 @@
 #  endif
   /* Pin disambiguation */
 
-#  define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_1
-#  define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_1
-#  define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_1
-#  define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_1
+#  define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_2
+#  define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_2
+#  define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_2
+#  define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_2
 
 #endif
 

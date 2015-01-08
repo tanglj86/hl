@@ -188,6 +188,31 @@
 #  endif
 #endif
 
+/* You can use either CAN1 or CAN2, */
+
+#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
+#  warning "The MYBOARD will only support one of CAN1 and CAN2"
+#endif
+
+/* You can't use CAN1 with FSMC:
+ *
+ *   PD0   = FSMC_D2 & CAN1_RX
+ *   PD1   = FSMC_D3 & CAN1_TX
+ */
+
+#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_FSMC)
+#  warning "The MYBOARD will only support one of CAN1 and FSMC"
+#endif
+
+/* The USB OTG HS ULPI bus is shared with CAN2 bus:
+ *
+ *   PB13  = ULPI_D6 & CAN2_TX
+ *   PB12  = ULPI_D7 & CAN2_RX
+ */
+
+#if defined(CONFIG_STM32_CAN2) && defined(CONFIG_STM32_OTGHS)
+#  warning "The MYBOARD will only support one of CAN2 and USB OTG HS"
+#endif
 /* STM32F4 HongNiu GPIOs **************************************************/
 /* LEDs */
 

@@ -189,6 +189,12 @@
 #define CONFIG_NSH_ARCHINIT 1
 #define CONFIG_SYSTEM_READLINE 1
 #define CONFIG_READLINE_ECHO 1
+#define CONFIG_CAN 1
+#define CONFIG_STM32_CAN1 1
+#define CONFIG_CAN_LOOPBACK 1
+#define CONFIG_CAN1_BAUD 500000
+#define CONFIG_EXAMPLES_CAN 1
+#define CONFIG_NSH_BUILTIN_APPS 1
 #define CONFIG_APPS_DIR "../apps"
 
 /* Sanity Checks *****************************************/
