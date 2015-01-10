@@ -120,6 +120,11 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += up_can.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += up_adc.c
+endif
+
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
