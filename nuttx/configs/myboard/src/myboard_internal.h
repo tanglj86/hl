@@ -225,13 +225,25 @@
 #define GPIO_LED4       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN6)
 
+/* Buttons
+ *
+ * -- ---- -------------- -------------------------------------------------------------------
+ * PN NAME SIGNAL         NOTES
+ * -- ---- -------------- -------------------------------------------------------------------
+ * 48 PB2  USERKEY1       Connected to KEY1
+ * 19 PF7  USERKEY3       Connected to KEY4
+ * 34 PA0  WAKEUP         Connected to KEY2
+ */
+
 /* BUTTONS -- NOTE that all have EXTI interrupts configured */
 
-#define MIN_IRQBUTTON   BUTTON_USER
-#define MAX_IRQBUTTON   BUTTON_USER
-#define NUM_IRQBUTTONS  1
+#define MIN_IRQBUTTON     BUTTON_KEY1
+#define MAX_IRQBUTTON     BUTTON_KEY3
+#define NUM_IRQBUTTONS    (BUTTON_KEY3 - BUTTON_KEY1 + 1)
 
-#define GPIO_BTN_USER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
+#define GPIO_BTN_WAKEUP   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
+#define GPIO_BTN_USERKEY1 (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTB|GPIO_PIN2)
+#define GPIO_BTN_USERKEY4 (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTF|GPIO_PIN7)
 
 /* PWM
  *

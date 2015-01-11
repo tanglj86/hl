@@ -53,7 +53,7 @@ CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  stm32_buttons.c
+CSRCS += up_buttons.c
 endif
 
 ifeq ($(CONFIG_STM32_OTGFS),y)
@@ -82,10 +82,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 CSRCS += stm32_pm.c
-endif
-
-ifeq ($(CONFIG_PM_BUTTONS),y)
-CSRCS += stm32_pm_buttons.c
 endif
 
 ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)

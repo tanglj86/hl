@@ -204,6 +204,10 @@
 #define CONFIG_STM32_TIM1_ADC3 1
 #define CONFIG_STM32_ADC3_SAMPLE_FREQUENCY 100
 #define CONFIG_STM32_ADC3_TIMTRIG 0
+#define CONFIG_SYSTEM_CUTERM 1
+#define CONFIG_SYSTEM_SYSINFO 1
+#define CONFIG_ARCH_BUTTONS 1
+#define CONFIG_ARCH_IRQBUTTONS 1
 #define CONFIG_APPS_DIR "../apps"
 
 /* Sanity Checks *****************************************/

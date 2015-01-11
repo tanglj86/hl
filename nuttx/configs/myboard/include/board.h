@@ -225,14 +225,24 @@
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
 
 /* Button definitions ***************************************************************/
-/* The STM32F4 Discovery supports one button: */
+/* The myboard supports five buttons: */
 
-#define BUTTON_USER        0
+#define BUTTON_KEY1         0  /* Name printed on board */
+#define BUTTON_KEY2         1
+#define BUTTON_KEY3         2
+#define NUM_BUTTONS         3
 
-#define NUM_BUTTONS        1
+#define BUTTON_USERKEY2     BUTTON_KEY1 /* Names in schematic */
+#define BUTTON_USERKEY      BUTTON_KEY2
+#define BUTTON_TAMPER       BUTTON_KEY3
 
-#define BUTTON_USER_BIT    (1 << BUTTON_USER)
+#define BUTTON_KEY1_BIT     (1 << BUTTON_KEY1)
+#define BUTTON_KEY2_BIT     (1 << BUTTON_KEY2)
+#define BUTTON_KEY3_BIT     (1 << BUTTON_KEY3)
 
+#define BUTTON_USERKEY2_BIT BUTTON_KEY1_BIT
+#define BUTTON_USERKEY_BIT  BUTTON_KEY2_BIT
+#define BUTTON_TAMPER_BIT   BUTTON_KEY3_BIT
 /* Alternate function pin selections ************************************************/
 
 /* UART3:

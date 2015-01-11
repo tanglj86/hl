@@ -99,6 +99,12 @@ void stm32_boardinitialize(void)
 
   board_led_initialize();
 #endif
+
+  /* Configure on-board BUTTONs if BUTTON support has been selected. */
+
+#ifdef CONFIG_ARCH_BUTTONS
+  board_button_initialize();
+#endif
 }
 
 /****************************************************************************
