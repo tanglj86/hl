@@ -1,1 +1,98 @@
-# The selected toolchain does not support dependency generation
+libxx_cxapurevirtual.o: libxx_cxapurevirtual.cxx \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cassert \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/assert.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/compiler.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdint.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/config.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/limits.h
+libxx_eabi_atexit.o: libxx_eabi_atexit.cxx \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/config.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cstdlib \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdlib.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/compiler.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/sys/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdint.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/limits.h \
+ libxx_internal.hxx
+libxx_cxa_atexit.o: libxx_cxa_atexit.cxx \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/config.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cassert \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/assert.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/compiler.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdint.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/limits.h \
+ libxx_internal.hxx /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cstdlib \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdlib.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/sys/types.h
+libxx_delete.o: libxx_delete.cxx \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/config.h \
+ libxx_internal.hxx /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cstdlib \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdlib.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/compiler.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/sys/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdint.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/limits.h
+libxx_deletea.o: libxx_deletea.cxx \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/config.h \
+ libxx_internal.hxx /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cstdlib \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdlib.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/compiler.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/sys/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdint.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/limits.h
+libxx_new.o: libxx_new.cxx \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/config.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cstddef \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/compiler.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stddef.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/sys/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdint.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/debug.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/syslog.h \
+ /home/tlj/nuttx/codebench/gcc-arm-none-eabi-4_8-2014q3/lib/gcc/arm-none-eabi/4.8.4/include/stdarg.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdbool.h libxx_internal.hxx \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cstdlib \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdlib.h
+libxx_newa.o: libxx_newa.cxx \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/config.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cstddef \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/compiler.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stddef.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/sys/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdint.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/debug.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/syslog.h \
+ /home/tlj/nuttx/codebench/gcc-arm-none-eabi-4_8-2014q3/lib/gcc/arm-none-eabi/4.8.4/include/stdarg.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdbool.h libxx_internal.hxx \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cstdlib \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdlib.h
+libxx_stdthrow.o: libxx_stdthrow.cxx \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/cxx/cstdlib \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/config.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdlib.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/nuttx/compiler.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/sys/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdint.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/types.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/arch/limits.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/debug.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/syslog.h \
+ /home/tlj/nuttx/codebench/gcc-arm-none-eabi-4_8-2014q3/lib/gcc/arm-none-eabi/4.8.4/include/stdarg.h \
+ /home/tlj/nuttx/nuttx-code/nuttx/include/stdbool.h
