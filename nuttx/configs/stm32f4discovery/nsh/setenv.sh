@@ -55,7 +55,7 @@ fi
 # This is the Cygwin path to the location where I installed the CodeSourcery
 # toolchain under windows.  You will also have to edit this if you install
 # the CodeSourcery toolchain in any other location
-export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
+export TOOLCHAIN_BIN="/home/tlj/nuttx/codebench/gcc-arm-none-eabi-4_8-2014q3/bin"
 #export TOOLCHAIN_BIN="/cygdrive/c/Users/MyName/MentorGraphics/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
 
 # These are the Cygwin paths to the locations where I installed the Atollic
@@ -70,7 +70,9 @@ export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ 
 # toolchain.
 #export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
+export STM32TOOL_DIR="${WD}/configs/stm32f4discovery/tools"
+
 # Add the path to the toolchain to the PATH variable
-export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="${TOOLCHAIN_BIN}:${STM32TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"
